@@ -1,12 +1,12 @@
-# NEXUS - Next.js Business Platform
+# Suburbmates - Community Connection Platform
 
-A modern, full-stack business platform built with Next.js 15, TypeScript, and a comprehensive tech stack for scalable applications.
+A modern, full-stack community platform built with Next.js 15, TypeScript, and a comprehensive tech stack for connecting suburban communities and neighbors.
 
 ## 🚀 Tech Stack
 
 ### Core Framework
 - **Next.js 15** - App Router, SSR/SSG for optimal performance
-- **TypeScript** - Type safety for Business, Lead, and Content management
+- **TypeScript** - Type safety for community features and user management
 - **React 19** - Latest React features and improvements
 
 ### Styling & UI
@@ -14,7 +14,7 @@ A modern, full-stack business platform built with Next.js 15, TypeScript, and a 
 - **Shadcn/ui** - Beautiful, accessible component library
 - **Radix UI** - Unstyled, accessible UI primitives
 - **Lucide React** - Beautiful & consistent icons
-- **Glass Design System** - Modern glass morphism components
+- **Modern Design System** - Clean, community-focused components
 
 ### Backend & Database
 - **Supabase** - Authentication, PostgreSQL database, Edge Functions
@@ -27,8 +27,8 @@ A modern, full-stack business platform built with Next.js 15, TypeScript, and a 
 - **React Hook Form** - Performant forms with easy validation
 
 ### Email & Communication
-- **Resend** - Modern email API for transactional emails
-- **Email Templates** - Pre-built templates for notifications
+- **Resend** - Modern email API for community notifications
+- **Email Templates** - Pre-built templates for community updates
 
 ### Testing
 - **Jest** - JavaScript testing framework
