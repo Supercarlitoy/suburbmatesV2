@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
-import { GeistSans } from 'geist/font/sans'
-import { GeistMono } from 'geist/font/mono'
-import { Analytics } from '@vercel/analytics/next'
+import { Inter } from 'next/font/google'
 import './globals.css'
+import AuthSessionProvider from '@/components/providers/SessionProvider'
+import { Toaster } from '@/components/ui/toaster'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Suburbmates - Community Connection Platform',
-  description: 'Connect with your suburban community and neighbors through Suburbmates',
+  title: 'SuburbMates - Melbourne Business Community Platform',
+  description: 'Connect with verified local businesses in Melbourne through our trusted community platform',
   generator: 'Next.js',
 }
 
@@ -17,18 +19,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <style>{`
-html {
-  font-family: ${GeistSans.style.fontFamily};
-  --font-sans: ${GeistSans.variable};
-  --font-mono: ${GeistMono.variable};
-}
-        `}</style>
-      </head>
-      <body>
-        {children}
-        <Analytics />
+      <body className={inter.className}>
+        <AuthSessionProvider>
+          {children}
+          <Toaster />
+        </AuthSessionProvider>
       </body>
     </html>
   )

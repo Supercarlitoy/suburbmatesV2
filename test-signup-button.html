@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signup Button Test</title>
+    <script>
+        async function testSignupAPI() {
+            console.log('Testing signup API directly...');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'TestPass123!',
+                        businessName: 'Test Business',
+                        suburb: 'Melbourne',
+                        serviceAreas: ['Melbourne'],
+                        category: 'Technology'
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                if (response.ok) {
+                    document.getElementById('result').innerHTML = 
+                        '<div style="color: green;">✅ API Working: ' + JSON.stringify(data) + '</div>';
+                } else {
+                    document.getElementById('result').innerHTML = 
+                        '<div style="color: red;">❌ API Error: ' + JSON.stringify(data) + '</div>';
+                }
+            } catch (error) {
+                console.error('Test failed:', error);
+                document.getElementById('result').innerHTML = 
+                    '<div style="color: red;">❌ Network Error: ' + error.message + '</div>';
+            }
+        }
+        
+        function testFormSubmission() {
+            console.log('Testing form submission...');
+            
+            // Navigate to signup page and test form
+            window.open('http://localhost:3000/signup', '_blank');
+            
+            // Instructions for manual testing
+            document.getElementById('instructions').innerHTML = `
+                <h3>Manual Form Test Instructions:</h3>
+                <ol>
+                    <li>A new tab opened with the signup page</li>
+                    <li>Open browser developer tools (F12)</li>
+                    <li>Go to Console tab</li>
+                    <li>Fill out the form with valid data:</li>
+                    <ul>
+                        <li>Email: test@gmail.com</li>
+                        <li>Password: TestPass123!</li>
+                        <li>Business Name: Test Business</li>
+                        <li>Select service areas</li>
+                        <li>Select category</li>
+                    </ul>
+                    <li>Click "Create Business Profile" button</li>
+                    <li>Watch console for logs and Network tab for requests</li>
+                    <li>Report back what you see</li>
+                </ol>
+            `;
+        }
+    </script>
+</head>
+<body>
+    <h1>Signup Button Diagnostic Test</h1>
+    
+    <h2>Test 1: API Endpoint</h2>
+    <button onclick="testSignupAPI()">Test API Directly</button>
+    <div id="result"></div>
+    
+    <h2>Test 2: Form Submission</h2>
+    <button onclick="testFormSubmission()">Test Form in Browser</button>
+    <div id="instructions"></div>
+    
+    <h2>Test 3: Check Application Status</h2>
+    <p>Application should be running at: <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
+    <p>Signup page: <a href="http://localhost:3000/signup" target="_blank">http://localhost:3000/signup</a></p>
+</body>
+</html>

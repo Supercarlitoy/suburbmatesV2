@@ -1,44 +1,121 @@
-# Suburbmates - Community Connection Platform
+# SuburbMates - Melbourne Business Community Platform
 
-A modern, full-stack community platform built with Next.js 15, TypeScript, and a comprehensive tech stack for connecting suburban communities and neighbors.
+A modern, full-stack platform connecting Melbourne businesses with local residents through verified profiles, smart search, and community engagement.
+
+## 🎯 Platform Overview
+
+SuburbMates is a dual-audience platform designed for:
+- **Business Owners**: Create verified profiles, manage listings, capture leads
+- **Local Residents**: Discover trusted businesses, read reviews, connect with services
+
+### Key Features
+- ✅ **ABN Verification System** - AI-assisted verification with admin approval
+- ✅ **Smart Search** - Suburb-specific business discovery
+- ✅ **Profile Customization** - Professional business profiles
+- ✅ **Lead Management** - Connect residents with businesses
+- ✅ **Admin Dashboard** - Quality control and approval workflow
+- ✅ **Mobile Responsive** - Optimized for all devices
 
 ## 🚀 Tech Stack
 
 ### Core Framework
-- **Next.js 15** - App Router, SSR/SSG for optimal performance
-- **TypeScript** - Type safety for community features and user management
+- **Next.js 15** - App Router, SSR/SSG, API routes
+- **TypeScript** - Full type safety throughout
 - **React 19** - Latest React features and improvements
 
 ### Styling & UI
 - **Tailwind CSS** - Utility-first CSS framework
 - **Shadcn/ui** - Beautiful, accessible component library
 - **Radix UI** - Unstyled, accessible UI primitives
-- **Lucide React** - Beautiful & consistent icons
-- **Modern Design System** - Clean, community-focused components
+- **Lucide React** - Consistent icon system
+- **Glass Card Design** - Modern, professional UI
 
 ### Backend & Database
-- **Supabase** - Authentication, PostgreSQL database, Edge Functions
-- **@supabase/ssr** - Server-side rendering support
+- **Supabase** - Authentication, PostgreSQL database
+- **Prisma** - Type-safe database client
 - **Edge Functions** - Serverless API endpoints
+
+### Business Logic
+- **ABR API Integration** - Australian Business Register verification
+- **AI-Assisted Verification** - Smart business validation
+- **Email Notifications** - Resend for transactional emails
 
 ### State Management & Validation
 - **Zustand** - Lightweight state management
 - **Zod** - TypeScript-first schema validation
-- **React Hook Form** - Performant forms with easy validation
+- **React Hook Form** - Performant forms
 
-### Email & Communication
-- **Resend** - Modern email API for community notifications
-- **Email Templates** - Pre-built templates for community updates
-
-### Testing
+### Testing & Quality
 - **Jest** - JavaScript testing framework
-- **Testing Library** - Simple and complete testing utilities
-- **@testing-library/jest-dom** - Custom Jest matchers
+- **Testing Library** - Component testing utilities
+- **TypeScript** - Compile-time error checking
 
 ### Development & Deployment
 - **Vercel** - Optimized deployment platform
 - **ESLint** - Code linting and formatting
 - **PostCSS** - CSS processing
+
+## 🏗️ Project Structure
+
+The project follows a **feature-based architecture** with clear separation of concerns:
+
+```
+suburbmates/
+├── app/                          # Next.js App Router
+│   ├── (admin)/                  # Admin dashboard routes
+│   ├── (auth)/                   # Authentication routes
+│   ├── (dashboard)/              # Business dashboard
+│   ├── (marketing)/              # Marketing pages
+│   ├── api/                      # API routes
+│   ├── business/[slug]/          # Public business profiles
+│   ├── search/                   # Search interface
+│   └── feed/                     # Community feed
+│
+├── features/                     # Feature-based modules
+│   ├── authentication/          # Auth logic & components
+│   ├── business-profiles/        # Profile management
+│   ├── verification/             # ABN verification system
+│   ├── search-discovery/         # Search functionality
+│   ├── lead-management/          # Lead capture & management
+│   └── admin/                    # Admin tools
+│
+├── components/                   # Reusable UI components
+│   ├── ui/                       # Base Shadcn components
+│   ├── business/                 # Business-specific components
+│   ├── admin/                    # Admin-specific components
+│   └── shared/                   # Shared components
+│
+├── lib/                          # Utility libraries
+│   ├── constants/                # App constants & data
+│   ├── database/                 # Database utilities
+│   ├── validation/               # Zod schemas
+│   ├── config/                   # Configuration files
+│   └── utils/                    # General utilities
+│
+├── server/                       # Backend services
+│   ├── auth/                     # Authentication logic
+│   ├── middleware/               # Custom middleware
+│   └── db/                       # Database connections
+│
+├── types/                        # TypeScript definitions
+│   ├── api/                      # API types
+│   ├── database/                 # Database types
+│   ├── business/                 # Business-related types
+│   └── global/                   # Global types
+│
+└── hooks/                        # Custom React hooks
+    ├── auth/                     # Authentication hooks
+    ├── business/                 # Business-related hooks
+    └── ui/                       # UI-related hooks
+```
+
+### Architecture Principles
+
+1. **Feature-Based Organization** - Related functionality grouped together
+2. **Separation of Concerns** - UI, business logic, and data layers separated
+3. **Reusable Components** - Modular, composable UI components
+4. **Type Safety** - Full TypeScript coverage throughout
+5. **Scalable Structure** - Easy to extend and maintain
 
 ## 📦 Installation
 

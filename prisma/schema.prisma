@@ -1,0 +1,196 @@
+// Suburbmates Business Network - Prisma Schema
+// Melbourne business connection and verification platform
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Business relationship
+  business Business?
+
+  @@map("users")
+}
+
+// Business Profiles
+model Business {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  abn          String?  @unique // Made optional for streamlined signup
+  email        String
+  bio          String?
+  suburb       String   // Primary suburb
+  serviceAreas String   @default("") // JSON string of suburbs they service
+  postcode     String?
+  phone        String?
+  website      String?
+  logo         String?
+  category     String?  // Business category
+  status       BusinessStatus @default(APPROVED) // Default approved for streamlined
+  needsReview  Boolean  @default(false) // Flag for admin review
+  
+  // Full-text search fields
+  searchVector Unsupported("tsvector")? // PostgreSQL full-text search vector
+  
+  // Profile Customization
+  themeId      String?  @default("corporate-blue") // Profile theme
+  layoutId     String?  @default("standard") // Layout option
+  headerStyle  String?  @default("standard") // Header style
+  ctaText      String?  @default("Get Quote") // Call-to-action text
+  ctaStyle     String?  @default("button") // CTA style
+  showTestimonials Boolean @default(true) // Show testimonials section
+  showGallery  Boolean  @default(true) // Show gallery section
+  showBusinessHours Boolean @default(true) // Show business hours
+  
+  // Social Media Links
+  facebookUrl  String?
+  instagramUrl String?
+  linkedinUrl  String?
+  
+  // ABN Verification System
+  abnVerificationStatus    String?   @default("unverified") // unverified, pending, verified, rejected
+  abnVerificationDate      DateTime?
+  abnVerificationData      Json?     // Store ABR API response data
+  abnVerificationNotes     String?   // Admin notes for verification
+  abnVerifiedBy           String?   // Admin user who verified
+  abnAutoVerified         Boolean   @default(false) // AI-assisted verification flag
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String   @unique
+// Profile Customization (JSON field for quick implementation)
+  profileTheme Json? // Stores theme and customization settings
+  
+  // Relationships
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content  Content[]
+  leads    Lead[]
+  customization BusinessProfileCustomization?
+
+  @@map("businesses")
+}
+
+// Business Profile Customization
+model BusinessProfileCustomization {
+  id               String   @id @default(cuid())
+  businessId       String   @unique
+  layout           ProfileLayout @default(CLASSIC)
+  accent           AccentColor @default(BLUE)
+  tagline          String?  @db.VarChar(60)
+  highlights       String[] // Up to 5 items
+  services         String[] // Up to 8 items, 40 chars each
+  coverImageUrl    String?
+  logoUrl          String?
+  gallery          String[] // Up to 6 images
+  shareTheme       ShareTheme @default(STANDARD)
+  watermarkOpacity Float    @default(0.15)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("business_customizations")
+}
+
+// Business Content Management
+model Content {
+  id         String      @id @default(cuid())
+  businessId String
+  type       ContentType @default(POST)
+  title      String?
+  text       String
+  images     String      @default("") // JSON string of image URLs
+  tags       String      @default("") // JSON string of tags
+  isPublic   Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("content")
+}
+
+// Lead Management
+model Lead {
+  id         String     @id @default(cuid())
+  businessId String
+  name       String
+  email      String
+  phone      String?
+  message    String
+  source     LeadSource @default(PROFILE)
+  status     LeadStatus @default(NEW)
+  createdAt  DateTime   @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("leads")
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum BusinessStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ContentType {
+  POST
+  UPDATE
+  ANNOUNCEMENT
+}
+
+enum LeadSource {
+  PROFILE
+  SEARCH
+  FEED
+  SHARE
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  CLOSED
+}
+
+// Profile Customization Enums
+enum ProfileLayout {
+  CLASSIC
+  BOLD
+  COMPACT
+}
+
+enum AccentColor {
+  BLUE
+  MINT
+  AMBER
+  PURPLE
+  RED
+  GREEN
+}
+
+enum ShareTheme {
+  STANDARD
+  BOLD
+}
