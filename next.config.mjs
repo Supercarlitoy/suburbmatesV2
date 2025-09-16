@@ -9,12 +9,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // External packages for server components
   serverExternalPackages: ['@prisma/client'],
-  // Experimental features for Next.js 15+
   experimental: {
-    // Add experimental features here if needed
+    // any experimental features you need
   },
+  output: undefined, // explicitly disable 'standalone' output
 }
 
-module.exports = nextConfig
+module.exports = nextConfig;
