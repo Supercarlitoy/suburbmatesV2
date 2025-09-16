@@ -11,11 +11,11 @@ const nextConfig = {
   },
   // Enable standalone output for Docker
   output: 'standalone',
-  // External packages for server components (updated for Next.js 15+)
+  // External packages for server components
   serverExternalPackages: ['@prisma/client'],
-  // Experimental features
+  // Experimental features for Next.js 15+
   experimental: {
-    // Add any experimental features here if needed
+    // Add experimental features here if needed
   },
 }
 
