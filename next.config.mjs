@@ -9,8 +9,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Enable standalone output for Docker
-  output: 'standalone',
   // External packages for server components
   serverExternalPackages: ['@prisma/client'],
   // Experimental features for Next.js 15+
@@ -19,4 +17,4 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+module.exports = nextConfig
