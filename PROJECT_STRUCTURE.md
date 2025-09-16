@@ -38,7 +38,7 @@ suburbmates/
 │   │   ├── login/
 │   │   ├── signup/
 │   │   └── layout.tsx
-│   ├── (dashboard)/              # Business dashboard
+│   ├── dashboard/               # Business dashboard
 │   │   ├── profile/
 │   │   ├── content/
 │   │   ├── leads/

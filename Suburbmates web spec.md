@@ -222,7 +222,7 @@ export function SignupForm() {
 }
 ```
 
-### `app/(dashboard)/profile/[id]/page.tsx` (Task 4)
+### `app/dashboard/profile/[id]/page.tsx` (Task 4)
 ```tsx
 import { ProfileEditor } from "@/features/profiles/components/ProfileEditor";
 import { GlassCard } from "@/ui/GlassCard";

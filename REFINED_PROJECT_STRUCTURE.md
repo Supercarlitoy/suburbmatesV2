@@ -83,7 +83,7 @@ suburbmates/
 │   │   └── verify/
 │   │       └── page.tsx                # Email verification
 │   │
-│   ├── 📊 **(dashboard)/** (Business Management)
+│   ├── 📊 **dashboard/** (Business Management)
 │   │   ├── layout.tsx                  # Dashboard layout with sidebar
 │   │   ├── page.tsx                    # Dashboard overview
 │   │   ├── loading.tsx                 # Dashboard loading

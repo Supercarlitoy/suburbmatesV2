@@ -64,7 +64,7 @@ suburbmates/
 ├── app/                          # Next.js App Router
 │   ├── (admin)/                  # Admin dashboard routes
 │   ├── (auth)/                   # Authentication routes
-│   ├── (dashboard)/              # Business dashboard
+│   ├── dashboard/               # Business dashboard
 │   ├── (marketing)/              # Marketing pages
 │   ├── api/                      # API routes
 │   ├── business/[slug]/          # Public business profiles
