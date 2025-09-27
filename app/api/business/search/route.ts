@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database/prisma";
 import { z } from "zod";
+import { rerank } from "@/lib/rerank";
 
 const searchSchema = z.object({
   query: z.string().optional(),
@@ -230,10 +231,20 @@ export async function GET(request: NextRequest) {
         (typeof business.serviceAreas === 'string' ? 
           JSON.parse(business.serviceAreas) : business.serviceAreas) : [],
       search_score: business.search_score || 0,
+      // Ensure dates are properly typed
+      updatedAt: new Date(business.updatedAt),
+      createdAt: new Date(business.createdAt),
     }));
 
+    // Apply reranking if enabled via feature flag
+    const rerankedBusinesses = await rerank(processedBusinesses, {
+      query: validatedParams.query,
+      suburb: validatedParams.suburb,
+      category: validatedParams.category,
+    });
+
     return NextResponse.json({
-      businesses: processedBusinesses,
+      businesses: rerankedBusinesses,
       pagination: {
         total: totalCount,
         limit: validatedParams.limit,
@@ -245,6 +256,11 @@ export async function GET(request: NextRequest) {
         query: validatedParams.query,
         suburb: validatedParams.suburb,
         category: validatedParams.category,
+      },
+      reranking: {
+        enabled: rerankedBusinesses.length > 0 && rerankedBusinesses[0].rerankScore > 0,
+        algorithm: 'rules_based',
+        factors: ['locality', 'completion', 'rating', 'recency', 'query_relevance'],
       },
       clientRerank: validatedParams.clientRerank,
     });
