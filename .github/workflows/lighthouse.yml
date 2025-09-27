@@ -1,0 +1,118 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_GA4_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA4_MEASUREMENT_ID }}
+          NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+      
+      - name: Start application server
+        run: |
+          npm start &
+          sleep 10
+          curl -f http://localhost:3000 || exit 1
+        env:
+          NEXT_PUBLIC_GA4_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA4_MEASUREMENT_ID }}
+          NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+      
+      - name: Wait for server
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
+      
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli@0.12.x
+          lhci autorun --upload.target=temporary-public-storage
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+      
+      - name: Format lighthouse score
+        id: format_lighthouse_score
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            try {
+              const resultsPath = '.lighthouseci';
+              const files = fs.readdirSync(resultsPath);
+              const manifestFile = files.find(f => f.includes('manifest.json'));
+              
+              if (manifestFile) {
+                const manifest = JSON.parse(fs.readFileSync(path.join(resultsPath, manifestFile), 'utf8'));
+                const summary = manifest.map(result => {
+                  const scores = result.summary;
+                  return `
+                  **${result.url}**
+                  - Performance: ${Math.round(scores.performance * 100)}
+                  - Accessibility: ${Math.round(scores.accessibility * 100)}
+                  - Best Practices: ${Math.round(scores['best-practices'] * 100)}
+                  - SEO: ${Math.round(scores.seo * 100)}
+                  `;
+                }).join('\\n');
+                
+                core.setOutput('summary', summary);
+              }
+            } catch (error) {
+              console.log('Could not read lighthouse results');
+              core.setOutput('summary', 'Lighthouse results not available');
+            }
+      
+      - name: Comment PR with Lighthouse scores
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const summary = `${{ steps.format_lighthouse_score.outputs.summary }}`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🚢 Lighthouse CI Results
+              
+              ${summary}
+              
+              Lighthouse ran against the following URLs:
+              - Homepage (\`/\`)
+              - Sample Business Profile (\`/business/demo-business\`)
+              
+              *These scores are averaged across 3 runs.*`
+            })
+
+# Test against these URLs
+urls:
+  - http://localhost:3000
+  - http://localhost:3000/business/demo-business
