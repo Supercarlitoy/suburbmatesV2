@@ -35,9 +35,9 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Get user's business
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 
@@ -97,12 +97,18 @@ export async function POST(request: NextRequest) {
     const validatedData = createLeadSchema.parse(body);
 
     // Verify business exists and is approved
-    const business = await prisma.business.findUnique({
-      where: {
-        id: validatedData.businessId,
-        status: 'APPROVED',
-      },
-    });
+  const business = await prisma.business.findUnique({
+    where: {
+      id: validatedData.businessId,
+    },
+  });
+
+  if (!business || business.approvalStatus !== 'APPROVED') {
+    return NextResponse.json(
+      { error: "Business not found or not approved" },
+      { status: 404 }
+    );
+  }
 
     if (!business) {
       return NextResponse.json(

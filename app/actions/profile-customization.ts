@@ -52,9 +52,9 @@ export async function updateProfileCustomization(formData: FormData): Promise<Ac
     }
 
     // Get user's business
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
       include: {
         customization: true
@@ -148,9 +148,9 @@ export async function updateProfileTheme(formData: FormData): Promise<ActionResu
     }
 
     // Get user's business
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 
@@ -257,10 +257,13 @@ export async function uploadProfileImage(formData: FormData): Promise<ActionResu
     }
 
     // Get user's business
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
+      include: {
+        customization: true
+      }
     });
 
     if (!business) {
@@ -311,9 +314,9 @@ export async function resetProfileCustomization(_formData: FormData): Promise<Ac
     }
 
     // Get user's business
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
       include: {
         customization: true

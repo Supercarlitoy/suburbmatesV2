@@ -1,0 +1,61 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0A2540;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0A2540;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Pattern overlay -->
+    <pattern id="grid-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="60" height="60" fill="none"/>
+      <rect x="5" y="5" width="8" height="8" fill="#B76E00" opacity="0.1" rx="1"/>
+      <rect x="20" y="20" width="8" height="8" fill="#B76E00" opacity="0.05" rx="1"/>
+      <rect x="35" y="5" width="8" height="8" fill="#B76E00" opacity="0.08" rx="1"/>
+      <rect x="5" y="35" width="8" height="8" fill="#B76E00" opacity="0.06" rx="1"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg-gradient)"/>
+  <rect width="1200" height="630" fill="url(#grid-pattern)"/>
+  
+  <!-- Main content container -->
+  <g transform="translate(100, 150)">
+    <!-- SuburbMates logo -->
+    <text x="0" y="80" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="700" fill="white">SuburbMates</text>
+    
+    <!-- Melbourne grid icon -->
+    <g transform="translate(720, 20)">
+      <!-- Grid representing Melbourne suburbs -->
+      <rect x="0" y="0" width="15" height="15" fill="#B76E00" rx="2"/>
+      <rect x="20" y="0" width="15" height="15" fill="#B76E00" rx="2" opacity="0.8"/>
+      <rect x="40" y="0" width="15" height="15" fill="#B76E00" rx="2" opacity="0.6"/>
+      <rect x="60" y="0" width="15" height="15" fill="#B76E00" rx="2" opacity="0.4"/>
+      
+      <rect x="0" y="20" width="15" height="15" fill="#B76E00" rx="2" opacity="0.8"/>
+      <rect x="20" y="20" width="15" height="15" fill="white" rx="2"/>
+      <rect x="40" y="20" width="15" height="15" fill="#B76E00" rx="2" opacity="0.8"/>
+      <rect x="60" y="20" width="15" height="15" fill="#B76E00" rx="2" opacity="0.6"/>
+      
+      <rect x="0" y="40" width="15" height="15" fill="#B76E00" rx="2" opacity="0.6"/>
+      <rect x="20" y="40" width="15" height="15" fill="#B76E00" rx="2" opacity="0.8"/>
+      <rect x="40" y="40" width="15" height="15" fill="#B76E00" rx="2" opacity="0.6"/>
+      <rect x="60" y="40" width="15" height="15" fill="#B76E00" rx="2" opacity="0.4"/>
+    </g>
+    
+    <!-- Tagline -->
+    <text x="0" y="150" font-family="Inter, system-ui, sans-serif" font-size="42" font-weight="400" fill="white" opacity="0.9">Melbourne Business Community Platform</text>
+    
+    <!-- Description -->
+    <text x="0" y="220" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="300" fill="white" opacity="0.8">Connect • Discover • Grow</text>
+    
+    <!-- CTA -->
+    <rect x="0" y="260" width="320" height="60" fill="#B76E00" rx="8"/>
+    <text x="160" y="300" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="600" fill="white" text-anchor="middle">Join the Community</text>
+  </g>
+  
+  <!-- Footer branding -->
+  <text x="50" y="600" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="400" fill="white" opacity="0.6">suburbmates.com.au</text>
+</svg>

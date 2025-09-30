@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { CheckCircle, LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { useStandardAnimations } from "@/lib/design-system";
 
 interface Benefit {
   title: string;
@@ -39,12 +41,6 @@ interface ValuePropositionCardProps {
   searchInput?: boolean;
 }
 
-const badgeVariants = {
-  green: "bg-green-100 text-green-800",
-  blue: "bg-blue-100 text-blue-800",
-  purple: "bg-purple-100 text-purple-800",
-  orange: "bg-orange-100 text-orange-800",
-};
 
 const buttonVariants = {
   primary: "bg-primary hover:bg-blue-600",
@@ -65,10 +61,11 @@ export function ValuePropositionCard({
   animationDirection,
   searchInput = false
 }: ValuePropositionCardProps) {
-  const animationX = animationDirection === "left" ? -24 : 24;
+  const { slideInFromLeft, slideInFromRight } = useStandardAnimations();
+  const animationProps = animationDirection === "left" ? slideInFromLeft : slideInFromRight;
 
   return (
-    <motion.div initial={{ opacity: 0, x: animationX }} whileInView={{ opacity: 1, x: 0 }}>
+    <motion.div {...animationProps}>
       <Card className={`p-8 border-2 ${borderColor} shadow-xl h-full flex flex-col`}>
         <CardHeader className="pb-6">
           <div className="flex items-center gap-4">
@@ -98,9 +95,13 @@ export function ValuePropositionCard({
 
           <div className="flex flex-wrap gap-2">
             {trustBadges.map((badge, i) => (
-              <Badge key={i} className={`${badgeVariants[badge.variant]} text-xs`}>
+              <StatusBadge 
+                key={i} 
+                variant={badge.variant} 
+                size="sm"
+              >
                 {badge.text}
-              </Badge>
+              </StatusBadge>
             ))}
           </div>
 

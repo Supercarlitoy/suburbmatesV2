@@ -49,7 +49,7 @@ export async function createLead(formData: FormData): Promise<ActionResult> {
     const business = await prisma.business.findUnique({
       where: {
         id: validatedData.businessId,
-        status: 'APPROVED',
+        approvalStatus: 'APPROVED',
       },
     });
 
@@ -133,9 +133,9 @@ export async function updateLeadStatus(formData: FormData): Promise<ActionResult
     const validatedData = updateLeadSchema.parse(rawData);
 
     // Get user's business
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 
@@ -222,9 +222,9 @@ export async function deleteLead(formData: FormData): Promise<ActionResult> {
     }
 
     // Get user's business
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 

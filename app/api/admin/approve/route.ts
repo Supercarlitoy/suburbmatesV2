@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { getCurrentUser, isAdmin } from "@/server/auth/auth";
+import { adminApproveBusiness, adminRejectBusiness } from "@/lib/services/approval-workflow";
+import { logAuditEvent } from "@/lib/utils/audit";
 import { z } from "zod";
-
-const prisma = new PrismaClient();
 
 const ApprovalSchema = z.object({
   businessId: z.string(),
-  action: z.enum(['approve', 'reject'])
+  action: z.enum(['approve', 'reject']),
+  reason: z.string().optional(),
+  notes: z.string().optional()
 });
 
 export async function POST(request: NextRequest) {
@@ -22,68 +23,78 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { businessId, action } = ApprovalSchema.parse(body);
+    const { businessId, action, reason, notes } = ApprovalSchema.parse(body);
 
-    // Get business details before updating
-    const business = await prisma.business.findUnique({
-      where: { id: businessId },
-      include: {
-        user: {
-          select: {
-            email: true
-          }
-        }
-      }
-    });
-
-    if (!business) {
-      return NextResponse.json(
-        { error: "Business not found" },
-        { status: 404 }
-      );
-    }
-
-    // Update business status
-    const newStatus = action === 'approve' ? 'APPROVED' : 'REJECTED';
-    const updatedBusiness = await prisma.business.update({
-      where: { id: businessId },
-      data: { 
-        status: newStatus,
-        updatedAt: new Date()
-      }
-    });
-
-    // Send notification email to business owner
-    try {
-      const emailType = action === 'approve' ? 'approval' : 'rejection';
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email/${emailType}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: business.email,
-          businessName: business.name,
-          slug: business.slug,
-          suburb: business.suburb
-        })
+    // Use service layer for business approval/rejection
+    if (action === 'approve') {
+      await adminApproveBusiness(businessId, user.id, notes);
+      
+      // Log admin approval action for audit
+      await logAuditEvent({
+        actorId: user.id,
+        action: 'ADMIN_APPROVE_BUSINESS_ROUTE',
+        target: businessId,
+        meta: {
+          adminNotes: notes,
+          approvedVia: 'admin_approve_route',
+        },
+        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
       });
-    } catch (emailError) {
-      console.error('Failed to send notification email:', emailError);
-      // Don't fail the approval if email fails
+      
+    } else if (action === 'reject') {
+      if (!reason) {
+        return NextResponse.json(
+          { error: "Rejection reason is required" },
+          { status: 400 }
+        );
+      }
+      
+      await adminRejectBusiness(businessId, user.id, reason, notes);
+      
+      // Log admin rejection action for audit
+      await logAuditEvent({
+        actorId: user.id,
+        action: 'ADMIN_REJECT_BUSINESS_ROUTE',
+        target: businessId,
+        meta: {
+          rejectionReason: reason,
+          adminNotes: notes,
+          rejectedVia: 'admin_approve_route',
+        },
+        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
+      });
     }
 
     return NextResponse.json({
       success: true,
-      message: `Business ${action}d successfully`,
-      business: {
-        id: updatedBusiness.id,
-        name: updatedBusiness.name,
-        status: updatedBusiness.status,
-        slug: updatedBusiness.slug
-      }
+      message: `Business ${action}d successfully using service layer`,
+      action,
+      businessId,
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {
     console.error("Business approval error:", error);
+
+    // Log error for audit
+    try {
+      const user = await getCurrentUser();
+      await logAuditEvent({
+        actorId: user?.id || 'unknown',
+        action: 'ADMIN_APPROVAL_ERROR',
+        target: undefined,
+        meta: {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          errorType: 'admin_approval_route_error',
+        },
+        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
+      });
+    } catch (auditError) {
+      console.error('Failed to log audit event:', auditError);
+    }
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -92,11 +103,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Handle business not found error from service layer
+    if (error instanceof Error && error.message.includes('not found')) {
+      return NextResponse.json(
+        { error: "Business not found" },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to process approval" },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

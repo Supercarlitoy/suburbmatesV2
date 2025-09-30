@@ -2,6 +2,9 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SuburbMatesLogo } from "@/components/ui/SuburbMatesLogo";
+import { glass } from "@/lib/design-system";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard - Suburbmates",
@@ -16,16 +19,16 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-background">
       {/* Admin Navigation */}
-      <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <nav className={`border-b ${glass.navBar} sticky top-0 z-50`}>
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link href="/" className="text-xl font-bold text-primary">
-                Suburbmates
+              <Link href="/">
+                <SuburbMatesLogo variant="NavigationLogo" size="sm" />
               </Link>
-              <Badge variant="destructive" className="text-xs">
+              <StatusBadge variant="red" size="sm">
                 ADMIN
-              </Badge>
+              </StatusBadge>
             </div>
             <div className="flex items-center gap-4">
               <Link href="/admin/approve">

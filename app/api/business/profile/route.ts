@@ -29,9 +29,9 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 
@@ -65,9 +65,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already has a business profile
-    const existingBusiness = await prisma.business.findUnique({
+    const existingBusiness = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 
@@ -101,8 +101,8 @@ export async function POST(request: NextRequest) {
         serviceAreas: validatedData.serviceAreas || "",
         abn: validatedData.abn || undefined,
         slug,
-        userId: session.user.id,
-        status: 'APPROVED', // Auto-approve for development
+        ownerId: session.user.id,
+        approvalStatus: 'APPROVED', // Auto-approve for development
       },
     });
 
@@ -135,9 +135,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 
@@ -209,9 +209,9 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 

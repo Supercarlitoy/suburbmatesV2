@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
           ) as search_score
         FROM "businesses" b
         WHERE 
-          b.status = 'APPROVED'
+          b."approvalStatus" = 'APPROVED'
           AND (
             -- Full-text search match
             b."searchVector" @@ websearch_to_tsquery('english', $5)
@@ -152,7 +152,7 @@ export async function GET(request: NextRequest) {
         SELECT COUNT(*) as count
         FROM "businesses" b
         WHERE 
-          b.status = 'APPROVED'
+          b."approvalStatus" = 'APPROVED'
           AND (
             b."searchVector" @@ websearch_to_tsquery('english', $1)
             OR
@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Fallback to basic filtering when no search query
       const whereClause: any = {
-        status: 'APPROVED',
+        approvalStatus: 'APPROVED',
       };
 
       if (validatedParams.suburb) {
@@ -213,7 +213,7 @@ export async function GET(request: NextRequest) {
             website: true,
             logo: true,
             serviceAreas: true,
-            status: true,
+            approvalStatus: true,
             createdAt: true,
           },
           orderBy: [{ createdAt: 'desc' }, { name: 'asc' }],

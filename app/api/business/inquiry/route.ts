@@ -20,9 +20,12 @@ const InquirySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  let requestBody: any = null;
   try {
     // Parse request body
+    let requestBody: any = null;
     const body = await request.json();
+    requestBody = body;
     
     // Validate input
     const validatedData = InquirySchema.parse(body);
@@ -30,7 +33,7 @@ export async function POST(request: NextRequest) {
     // Verify the business exists
     const business = await prisma.business.findUnique({
       where: { id: validatedData.businessId },
-      select: { id: true, name: true, email: true, userId: true },
+      select: { id: true, name: true, email: true, ownerId: true },
     });
 
     if (!business) {
@@ -78,13 +81,7 @@ export async function POST(request: NextRequest) {
         email: validatedData.email,
         phone: validatedData.phone || null,
         message: validatedData.message,
-        source: validatedData.source || null,
         utm: utmData,
-        status: inquiryStatus as any,
-        meta: {
-          ai_qualification: leadQualification,
-          priority: leadQualification?.priority || 'medium',
-        },
       },
     });
 
@@ -146,7 +143,6 @@ export async function POST(request: NextRequest) {
       message: 'Inquiry submitted successfully',
       inquiry: {
         id: inquiry.id,
-        status: inquiry.status,
         submittedAt: inquiry.createdAt,
         businessName: business.name,
       },
@@ -162,7 +158,7 @@ export async function POST(request: NextRequest) {
         action: 'submit',
       },
       extra: {
-        businessId: body?.businessId,
+        businessId: requestBody?.businessId,
         requestUrl: request.url,
         userAgent: request.headers.get('user-agent'),
       },
@@ -216,11 +212,8 @@ export async function GET(request: NextRequest) {
         email: inquiry.email,
         phone: inquiry.phone,
         message: inquiry.message,
-        status: inquiry.status,
-        source: inquiry.source,
         utm: inquiry.utm,
         createdAt: inquiry.createdAt,
-        updatedAt: inquiry.updatedAt,
       })),
     });
 

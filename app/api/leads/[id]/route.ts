@@ -25,9 +25,9 @@ export async function GET(
     }
 
     // Get user's business
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 
@@ -80,9 +80,9 @@ export async function PUT(
     }
 
     // Get user's business
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 
@@ -153,9 +153,9 @@ export async function DELETE(
     }
 
     // Get user's business
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 

@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { glass } from "@/lib/design-system";
+import { useStandardAnimations } from "@/lib/design-system";
 
 interface HeroSectionProps {
   badge?: string;
@@ -29,11 +31,6 @@ interface HeroSectionProps {
   backgroundVariant?: "default" | "white" | "gradient";
 }
 
-const glass = {
-  shell: "bg-white/5 backdrop-blur-2xl border border-white/10",
-  gradientText: "bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent",
-  heroBg: "bg-gradient-to-br from-slate-50 via-blue-50 to-green-50",
-};
 
 export function HeroSection({
   badge,
@@ -46,6 +43,8 @@ export function HeroSection({
   showScrollIndicator = false,
   backgroundVariant = "default"
 }: HeroSectionProps) {
+  const { fadeInUp, slideInFromLeft } = useStandardAnimations();
+  
   const backgroundClass = {
     default: glass.heroBg,
     white: "bg-white",
@@ -59,17 +58,14 @@ export function HeroSection({
         <div className="absolute inset-0 pointer-events-none">
           <motion.div
             className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-[floating_6s_ease-in-out_infinite]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
+            {...fadeInUp}
             aria-hidden
           />
           <motion.div
             className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent/5 rounded-full blur-3xl animate-[floating_6s_ease-in-out_infinite]"
             style={{ animationDelay: "2s" } as React.CSSProperties}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.5 }}
+            {...fadeInUp}
+            transition={{ ...fadeInUp.transition, delay: 0.5 }}
             aria-hidden
           />
         </div>
@@ -80,8 +76,7 @@ export function HeroSection({
         {badge && (
           <motion.div
             className={`inline-flex items-center gap-2 ${glass.shell} px-6 py-3 rounded-full mb-8`}
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            {...slideInFromLeft}
           >
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" aria-hidden />
             <span className="text-sm text-gray-700">{badge}</span>
@@ -91,8 +86,7 @@ export function HeroSection({
         {/* Title */}
         <motion.h1
           className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight"
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          {...fadeInUp}
         >
           <span className="block text-gray-900">{title}</span>
           {subtitle && (
@@ -103,8 +97,7 @@ export function HeroSection({
         {/* Description */}
         <motion.p
           className="mt-6 text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          {...fadeInUp}
         >
           {description}
         </motion.p>
@@ -113,8 +106,7 @@ export function HeroSection({
         {(primaryCTA || secondaryCTA) && (
           <motion.div
             className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            {...fadeInUp}
           >
             {primaryCTA && (
               <Link href={primaryCTA.href} aria-label={primaryCTA.ariaLabel}>
@@ -154,8 +146,7 @@ export function HeroSection({
       {showScrollIndicator && (
         <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          {...fadeInUp}
           aria-hidden
         >
           <div className="w-6 h-10 border-2 border-gray-400 rounded-full grid place-items-center">

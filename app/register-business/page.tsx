@@ -345,8 +345,8 @@ export default function RegisterBusinessPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {MELBOURNE_SUBURBS.map((suburb) => (
-                          <SelectItem key={suburb} value={suburb}>
-                            {suburb}
+                          <SelectItem key={suburb.id} value={suburb.name}>
+                            {suburb.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

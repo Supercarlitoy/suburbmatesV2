@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "suburbmates-filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/carlg/Documents/PROJECTS/suburbmates"],
+      "working_directory": "/Users/carlg/Documents/PROJECTS/suburbmates"
+    },
+    "suburbmates-postgres": {
+      "command": "npx", 
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://postgres:November281986.@db.mefqaulxkqiriljwemvx.supabase.co:5432/postgres?schema=public"],
+      "env": {
+        "DATABASE_URL": "postgresql://postgres:November281986.@db.mefqaulxkqiriljwemvx.supabase.co:5432/postgres?schema=public"
+      }
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "sequential-thinking": {
+      "command": "npx", 
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_3eAIBiu6wiyhrvyXPYQ8FFnH0yDUbt01lWK"
+      }
+    }
+  }
+}

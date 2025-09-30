@@ -118,8 +118,8 @@ export async function POST(request: NextRequest) {
         serviceAreas: JSON.stringify(serviceAreas),
         category,
         phone: phone || null,
-        status: 'PENDING', // Requires admin approval
-        userId: user.id
+        approvalStatus: 'PENDING', // Requires admin approval
+        ownerId: user.id
       }
     });
 
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
         id: business.id,
         slug: business.slug,
         name: business.name,
-        status: business.status
+        approvalStatus: business.approvalStatus
       }
     });
 

@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -19,8 +19,17 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Business relationship
-  business Business?
+  // Business relationship (new ownership model)
+  ownedBusinesses Business[]
+  
+  // Ownership claims
+  ownershipClaims OwnershipClaim[]
+  
+  // Manual quality boosts
+  manualQualityBoosts ManualQualityBoost[]
+  
+  // CLI jobs
+  cliJobs CLIJob[]
 
   @@map("users")
 }
@@ -30,23 +39,40 @@ model Business {
   id           String   @id @default(cuid())
   slug         String   @unique
   name         String
-  abn          String?  @unique // Made optional for streamlined signup
-  email        String
-  bio          String?
   suburb       String   // Primary suburb
+  category     String?  // Business category
+  phone        String?
+  email        String?
+  website      String?
+  
+  // Geolocation data
+  latitude     Float?
+  longitude    Float?
+  
+  // Legacy verification (deprecated in favor of abnStatus)
+  verified     Boolean  @default(false) // Only true if abnStatus=VERIFIED
+  
+  // ABN Management (Optional)
+  abn          String?  // Australian Business Number
+  abnStatus    AbnStatus @default(NOT_PROVIDED)
+  
+  // Approval Workflow
+  approvalStatus     ApprovalStatus @default(PENDING)
+  requiresVerification Boolean @default(false)
+  approvedAt         DateTime?
+  rejectedAt         DateTime?
+  
+  // Directory Management
+  source       BusinessSource @default(MANUAL)
+  qualityScore Int      @default(0) // 0-100
+  duplicateOfId String? // foreign key to Business
+  ownerId      String?  // foreign key to User
+  
+  // Profile Customization (preserved from existing)
+  bio          String?
   serviceAreas String   @default("") // JSON string of suburbs they service
   postcode     String?
-  phone        String?
-  website      String?
   logo         String?
-  category     String?  // Business category
-  status       BusinessStatus @default(APPROVED) // Default approved for streamlined
-  needsReview  Boolean  @default(false) // Flag for admin review
-  
-  // Full-text search fields
-  searchVector Unsupported("tsvector")? // PostgreSQL full-text search vector
-  
-  // Profile Customization
   themeId      String?  @default("corporate-blue") // Profile theme
   layoutId     String?  @default("standard") // Layout option
   headerStyle  String?  @default("standard") // Header style
@@ -61,26 +87,25 @@ model Business {
   instagramUrl String?
   linkedinUrl  String?
   
-  // ABN Verification System
-  abnVerificationStatus    String?   @default("unverified") // unverified, pending, verified, rejected
-  abnVerificationDate      DateTime?
-  abnVerificationData      Json?     // Store ABR API response data
-  abnVerificationNotes     String?   // Admin notes for verification
-  abnVerifiedBy           String?   // Admin user who verified
-  abnAutoVerified         Boolean   @default(false) // AI-assisted verification flag
+  // Full-text search fields
+  searchVector Unsupported("tsvector")? // PostgreSQL full-text search vector
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  userId       String   @unique
-// Profile Customization (JSON field for quick implementation)
-  profileTheme Json? // Stores theme and customization settings
   
   // Relationships
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  owner    User?     @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  duplicateOf Business? @relation("BusinessDuplicates", fields: [duplicateOfId], references: [id])
+  duplicates  Business[] @relation("BusinessDuplicates")
   content  Content[]
   leads    Lead[]
+  inquiries Inquiry[]
+  ownershipClaims OwnershipClaim[]
   customization BusinessProfileCustomization?
+  auditLogs AuditLog[]
+  manualQualityBoosts ManualQualityBoost[]
 
+  @@index([ownerId])
   @@map("businesses")
 }
 
@@ -147,6 +172,31 @@ enum UserRole {
   ADMIN
 }
 
+// Directory Admin Spec Enums
+enum AbnStatus {
+  NOT_PROVIDED
+  PENDING
+  VERIFIED
+  VALID
+  INVALID
+  EXPIRED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum BusinessSource {
+  MANUAL
+  CSV
+  CSV_IMPORT
+  AUTO_ENRICH
+  CLAIMED
+}
+
+// Legacy enum (deprecated)
 enum BusinessStatus {
   PENDING
   APPROVED
@@ -193,4 +243,148 @@ enum AccentColor {
 enum ShareTheme {
   STANDARD
   BOLD
+}
+
+// Ownership Claims for Business Verification
+model OwnershipClaim {
+  id         String      @id @default(cuid())
+  businessId String
+  userId     String
+  method     ClaimMethod
+  status     ClaimStatus @default(PENDING)
+  evidence   Json?       // Verification evidence data
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ownership_claims")
+}
+
+// Business Inquiries (Enhanced Lead Capture)
+model Inquiry {
+  id         String   @id @default(cuid())
+  businessId String
+  name       String
+  email      String?
+  phone      String?
+  message    String
+  utm        Json?    // UTM tracking parameters
+  createdAt  DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("inquiries")
+}
+
+// Audit Log for Business Actions
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?  // User who performed action
+  action    String   // Action performed
+  eventType String?  // Event type for filtering
+  target    String?  // Target resource ID
+  meta      Json?    // Additional metadata
+  ipAddress String?  // Request IP address (optional)
+  userAgent String?  // Request user agent (optional)
+  createdAt DateTime @default(now())
+  
+  // Relationships
+  business  Business? @relation(fields: [target], references: [id])
+
+  @@map("audit_logs")
+}
+
+// Additional enums for new models
+enum ClaimMethod {
+  EMAIL_DOMAIN
+  PHONE_OTP
+  DOCUMENT
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CLOSED
+}
+
+
+// Feature Flags for automation and A/B testing
+model FeatureFlag {
+  key         String  @id
+  enabled     Boolean @default(false)
+  value       Json?   // Configuration values
+  description String?
+  audience    String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@map("feature_flags")
+}
+
+// Manual Quality Score Boosts for Admin Control
+model ManualQualityBoost {
+  id            String   @id @default(cuid())
+  businessId    String
+  adminUserId   String
+  originalScore Int      // Score before boost
+  boostAmount   Int      // Positive or negative boost
+  newScore      Int      // Score after boost
+  reason        String   // Admin reason for boost
+  category      BoostCategory @default(OTHER)
+  expiresAt     DateTime? // Null for permanent boosts
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relationships
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  adminUser   User     @relation(fields: [adminUserId], references: [id], onDelete: Restrict)
+
+  @@map("manual_quality_boosts")
+}
+
+// Enum for manual boost categories
+enum BoostCategory {
+  PREMIUM_LISTING
+  QUALITY_EXCEPTION
+  MARKETING_BOOST
+  PARTNERSHIP
+  CORRECTION
+  SEASONAL_PROMOTION
+  OTHER
+}
+
+// CLI Job Management for Web Bridge
+model CLIJob {
+  id          String        @id @default(cuid())
+  command     String        // CLI command executed
+  args        Json          // Command arguments
+  status      CLIJobStatus  @default(PENDING)
+  progress    Json?         // Progress data {current, total, message, percentage}
+  result      Json?         // Job result {success, data, error, output, warnings}
+  createdAt   DateTime      @default(now())
+  startedAt   DateTime?     // When job started execution
+  completedAt DateTime?     // When job completed
+  createdBy   String        // User ID who created the job
+  metadata    Json          @default("{}")
+  
+  // Relationships
+  creator User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([createdBy])
+  @@index([createdAt])
+  @@map("cli_jobs")
+}
+
+
+// CLI Job Status Enum
+enum CLIJobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
 }

@@ -1,0 +1,28 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- SuburbMates Icon Mark - Grid representing Melbourne suburbs -->
+  <rect width="32" height="32" fill="#0A2540" rx="6"/>
+  
+  <!-- Central grid pattern in amber -->
+  <g transform="translate(8, 8)">
+    <!-- 4x4 suburb grid -->
+    <rect x="0" y="0" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.8"/>
+    <rect x="4.5" y="0" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="9" y="0" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.8"/>
+    <rect x="13.5" y="0" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.6"/>
+    
+    <rect x="0" y="4.5" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="4.5" y="4.5" width="3" height="3" fill="white" rx="0.5"/>
+    <rect x="9" y="4.5" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="13.5" y="4.5" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.8"/>
+    
+    <rect x="0" y="9" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.8"/>
+    <rect x="4.5" y="9" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="9" y="9" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.8"/>
+    <rect x="13.5" y="9" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.6"/>
+    
+    <rect x="0" y="13.5" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.6"/>
+    <rect x="4.5" y="13.5" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.8"/>
+    <rect x="9" y="13.5" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.6"/>
+    <rect x="13.5" y="13.5" width="3" height="3" fill="#B76E00" rx="0.5" opacity="0.4"/>
+  </g>
+</svg>

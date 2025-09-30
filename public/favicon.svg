@@ -1,0 +1,29 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- SuburbMates Favicon - Navy background with amber grid -->
+  <rect width="32" height="32" fill="#0A2540" rx="4"/>
+  
+  <!-- Simple "S" shape made from grid -->
+  <g transform="translate(6, 6)">
+    <!-- Top curve of S -->
+    <rect x="2" y="2" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="6" y="2" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="10" y="2" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="14" y="2" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    
+    <!-- Left vertical -->
+    <rect x="2" y="6" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    
+    <!-- Middle horizontal -->
+    <rect x="6" y="10" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="10" y="10" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    
+    <!-- Right vertical -->
+    <rect x="14" y="14" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    
+    <!-- Bottom curve -->
+    <rect x="2" y="18" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="6" y="18" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="10" y="18" width="3" height="3" fill="#B76E00" rx="0.5"/>
+    <rect x="14" y="18" width="3" height="3" fill="#B76E00" rx="0.5"/>
+  </g>
+</svg>

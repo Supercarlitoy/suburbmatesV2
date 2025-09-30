@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         id: true,
         name: true,
         abn: true,
-        abnVerificationStatus: true
+        abnStatus: true
       }
     });
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already verified
-    if (business.abnVerificationStatus === 'verified') {
+    if (business.abnStatus === 'VERIFIED') {
       return NextResponse.json(
         { error: "Business is already verified" },
         { status: 400 }
@@ -58,10 +58,7 @@ export async function POST(request: NextRequest) {
         await prisma.business.update({
           where: { id: businessId },
           data: {
-            abnVerificationStatus: 'rejected',
-            abnVerificationDate: new Date(),
-            abnVerificationNotes: `ABR Verification Failed: ${error.message}`,
-            abnAutoVerified: false
+            abnStatus: 'INVALID'
           }
         });
 
@@ -82,17 +79,13 @@ export async function POST(request: NextRequest) {
       where: { id: businessId },
       data: {
         abn: abrData.ABN, // Update with verified ABN format
-        abnVerificationStatus: aiRecommendation === 'auto_approve' ? 'verified' : 'pending',
-        abnVerificationDate: new Date(),
-        abnVerificationData: abrData as any, // Store full ABR response
-        abnVerificationNotes: verificationNotes,
-        abnAutoVerified: aiRecommendation === 'auto_approve'
+        abnStatus: aiRecommendation === 'auto_approve' ? 'VERIFIED' : 'PENDING'
       }
     });
 
     return NextResponse.json({
       success: true,
-      status: updatedBusiness.abnVerificationStatus,
+      status: updatedBusiness.abnStatus,
       aiRecommendation,
       businessData: {
         entityName: abrData.entityName,

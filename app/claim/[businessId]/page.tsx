@@ -35,7 +35,7 @@ interface Business {
   suburb: string;
   category: string;
   bio?: string;
-  status: string;
+  approvalStatus?: string;
 }
 
 interface ClaimFormData {
@@ -222,7 +222,7 @@ export default function ClaimBusinessPage() {
         throw new Error('Failed to submit claim');
       }
 
-      const result = await response.json();
+      await response.json();
       
       toast({
         title: "Claim submitted successfully!",
@@ -268,7 +268,7 @@ export default function ClaimBusinessPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">
-              The business you're trying to claim could not be found or may have been removed.
+The business you&apos;re trying to claim could not be found or may have been removed.
             </p>
             <Button onClick={() => router.push('/')} className="w-full">
               Return Home
@@ -289,7 +289,7 @@ export default function ClaimBusinessPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => router.push(`/business/${business.slug || business.id}`)}
+onClick={() => router.push(`/business/${business.id}`)}
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -370,7 +370,7 @@ export default function ClaimBusinessPage() {
                           <p className="text-sm text-muted-foreground">{business.suburb}, VIC</p>
                         </div>
                         <Badge variant="secondary">
-                          {business.status === 'APPROVED' ? 'Listed' : business.status}
+{(business as unknown as { approvalStatus?: string }).approvalStatus === 'APPROVED' ? 'Listed' : (business as unknown as { approvalStatus?: string }).approvalStatus}
                         </Badge>
                       </div>
                       
@@ -421,13 +421,13 @@ export default function ClaimBusinessPage() {
                 <CardHeader>
                   <CardTitle>Choose Verification Method</CardTitle>
                   <CardDescription>
-                    Select how you'd like to verify ownership of this business.
+Select how you&apos;d like to verify ownership of this business.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <RadioGroup
                     value={formData.method}
-                    onValueChange={(value) => updateFormData({ method: value as any })}
+onValueChange={(value) => updateFormData({ method: value as ClaimFormData['method'] })}
                     className="space-y-4"
                   >
                     {VERIFICATION_METHODS.map((method) => (
@@ -479,7 +479,7 @@ export default function ClaimBusinessPage() {
                           placeholder="name@yourbusiness.com.au"
                         />
                         <p className="text-xs text-muted-foreground">
-                          Use an email address from your business domain. We'll send a verification link to this email.
+Use an email address from your business domain. We&apos;ll send a verification link to this email.
                         </p>
                       </div>
                     </div>
@@ -499,7 +499,7 @@ export default function ClaimBusinessPage() {
                           placeholder="0312 345 678"
                         />
                         <p className="text-xs text-muted-foreground">
-                          We'll send a verification code to this phone number.
+We&apos;ll send a verification code to this phone number.
                         </p>
                       </div>
                     </div>
@@ -532,7 +532,7 @@ export default function ClaimBusinessPage() {
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        We'll verify your ABN against official ABR records.
+We&apos;ll verify your ABN against official ABR records.
                       </p>
                     </div>
                   )}
@@ -678,8 +678,8 @@ export default function ClaimBusinessPage() {
                     <Shield className="h-4 w-4" />
                     <AlertDescription>
                       <strong>What happens next?</strong><br />
-                      We'll review your claim within 1-2 business days. You'll receive an email update about the status 
-                      of your claim. If approved, you'll gain full access to manage this business profile.
+We&apos;ll review your claim within 1-2 business days. You&apos;ll receive an email update about the status 
+of your claim. If approved, you&apos;ll gain full access to manage this business profile.
                     </AlertDescription>
                   </Alert>
                 </CardContent>

@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { glass } from '@/lib/design-system';
+import { useStandardAnimations } from '@/lib/design-system';
 import { 
   X, 
   ArrowRight, 
@@ -110,6 +112,7 @@ interface OnboardingTourProps {
 export function OnboardingTour({ isVisible, onComplete, onSkip }: OnboardingTourProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const { fadeInUp } = useStandardAnimations();
   
   const currentStepData = onboardingSteps[currentStep];
   const progress = ((currentStep + 1) / onboardingSteps.length) * 100;
@@ -149,7 +152,7 @@ export function OnboardingTour({ isVisible, onComplete, onSkip }: OnboardingTour
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
+      <div className={`fixed inset-0 z-50 bg-black/50 ${glass.overlay}`}>
         {/* Highlight Target Element */}
         {currentStepData.target && (
           <div 

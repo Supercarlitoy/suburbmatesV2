@@ -1,0 +1,21 @@
+Category,Item,Status,Priority,Owner,Notes,File/Path,Estimated Hours
+Build,TypeScript compilation,FAIL,Critical,Developer,114+ errors in og route,app/api/og/route.tsx,2-3
+Build,Production build succeeds,FAIL,Critical,Developer,Due to TypeScript errors,,0.5
+Config,Next.js prod configuration,FAIL,Critical,Developer,Dev settings enabled,next.config.mjs,0.5
+Assets,Favicon present,FAIL,Critical,Designer,Missing favicon.ico,public/favicon.ico,0.5
+Assets,Robots.txt,FAIL,Critical,Developer,Missing robots.txt,public/robots.txt,0.5
+Assets,Site manifest,FAIL,Critical,Developer,Missing manifest.json,public/manifest.json,0.5
+Assets,Production images,FAIL,High,Designer,Only placeholders,public/,2-3
+Security,Dependency vulnerabilities,WARN,High,Developer,3 low severity,package.json,0.5
+Database,Production-safe seeds,FAIL,High,Developer,Dev data only,prisma/seed.cjs,0.5
+Environment,Env documentation,FAIL,High,Developer,No .env.example,.env.example,1
+Code Quality,ESLint configuration,FAIL,Medium,Developer,Wrong config format,eslint.config.js,0.5
+Testing,Test suite functional,PASS,Medium,QA,Playwright tests exist,tests/,N/A
+Performance,Bundle size reasonable,PASS,Low,Developer,102kB shared acceptable,,N/A
+Auth,Supabase integration,PASS,Critical,Developer,Working properly,lib/supabase/,N/A
+API,Input validation,PARTIAL,High,Developer,73% coverage,app/api/,1-2
+Email,Professional templates,PASS,Medium,Developer,Recently implemented,lib/email.ts,N/A
+Content,TODO cleanup,FAIL,High,Developer,200+ instances throughout,Multiple files,2-3
+Content,Placeholder text,FAIL,High,Content,User-facing placeholders,components/,1-2
+Monitoring,Error tracking,PASS,Medium,DevOps,Sentry configured,sentry.*.config.ts,N/A
+Documentation,Deployment guide,FAIL,Medium,DevOps,Missing prod deployment docs,README.md,1

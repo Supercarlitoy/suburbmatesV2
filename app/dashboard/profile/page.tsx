@@ -28,7 +28,7 @@ interface BusinessProfile {
   category: string;
   serviceAreas: string[];
   abn?: string;
-  status: string;
+  approvalStatus?: string;
 }
 
 export default function ProfilePage() {
@@ -44,7 +44,7 @@ export default function ProfilePage() {
     category: "",
     serviceAreas: [],
     abn: "",
-    status: "PENDING"
+    approvalStatus: "PENDING"
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -78,7 +78,7 @@ export default function ProfilePage() {
             category: business.category || "",
             serviceAreas: business.serviceAreas ? JSON.parse(business.serviceAreas) : [],
             abn: business.abn || "",
-            status: business.status || "PENDING"
+            approvalStatus: business.approvalStatus || "PENDING"
           });
         }
       } else if (response.status !== 404) {
@@ -135,15 +135,16 @@ export default function ProfilePage() {
       setProfile(prev => ({
         ...prev,
         id: result.id,
-        status: result.status
+        approvalStatus: result.approvalStatus
       }));
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Save error:', err);
-      setError(err.message || 'Failed to save profile');
+      const message = err instanceof Error ? err.message : 'Failed to save profile';
+      setError(message);
       toast({
         title: "Error",
-        description: err.message || 'Failed to save profile',
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -182,13 +183,13 @@ export default function ProfilePage() {
         <p className="text-gray-600 mt-2">
           {profile.id ? 'Update your business information' : 'Create your business profile to start connecting with customers'}
         </p>
-        {profile.status && (
+        {profile.approvalStatus && (
           <div className="mt-4">
             <Badge 
-              variant={profile.status === 'APPROVED' ? 'default' : 'secondary'}
+              variant={profile.approvalStatus === 'APPROVED' ? 'default' : 'secondary'}
               className="text-sm"
             >
-              Status: {profile.status}
+              Status: {profile.approvalStatus}
             </Badge>
           </div>
         )}

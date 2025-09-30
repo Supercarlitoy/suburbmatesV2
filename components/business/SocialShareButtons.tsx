@@ -14,8 +14,8 @@ import {
   Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { QRCodeGenerator } from './QRCodeGenerator';
-import { EmbedCodeGenerator } from './EmbedCodeGenerator';
+import QRCodeGenerator from './QRCodeGenerator';
+import EmbedCodeGenerator from './EmbedCodeGenerator';
 
 interface Business {
   id: string;
@@ -253,22 +253,38 @@ export function SocialShareButtons({
 
         {/* QR Code Modal */}
         {showQR && (
-          <QRCodeGenerator
-            business={business}
-            url={url}
-            isOpen={showQR}
-            onClose={() => setShowQR(false)}
-          />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">QR Code</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowQR(false)}>
+                  ×
+                </Button>
+              </div>
+              <QRCodeGenerator
+                businessName={business.name}
+                businessSlug={business.slug}
+              />
+            </div>
+          </div>
         )}
 
         {/* Embed Code Modal */}
         {showEmbed && (
-          <EmbedCodeGenerator
-            business={business}
-            url={url}
-            isOpen={showEmbed}
-            onClose={() => setShowEmbed(false)}
-          />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg max-w-2xl w-full mx-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Embed Code</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowEmbed(false)}>
+                  ×
+                </Button>
+              </div>
+              <EmbedCodeGenerator
+                businessName={business.name}
+                businessSlug={business.slug}
+              />
+            </div>
+          </div>
         )}
       </div>
     );

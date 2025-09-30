@@ -1,0 +1,23 @@
+<svg width="240" height="60" viewBox="0 0 240 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background for better visibility -->
+  <rect width="240" height="60" fill="transparent"/>
+  
+  <!-- SuburbMates Logotype -->
+  <text x="10" y="38" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="700" fill="#0A2540">SuburbMates</text>
+  
+  <!-- Melbourne connection symbol - simplified map grid -->
+  <g transform="translate(200, 15)">
+    <!-- Outer circle representing Melbourne metro -->
+    <circle cx="15" cy="15" r="12" fill="#B76E00" opacity="0.15"/>
+    <!-- Grid pattern representing suburbs -->
+    <rect x="9" y="9" width="4" height="4" fill="#B76E00" rx="0.5"/>
+    <rect x="15" y="9" width="4" height="4" fill="#B76E00" rx="0.5" opacity="0.7"/>
+    <rect x="21" y="9" width="4" height="4" fill="#B76E00" rx="0.5" opacity="0.5"/>
+    <rect x="9" y="15" width="4" height="4" fill="#B76E00" rx="0.5" opacity="0.7"/>
+    <rect x="15" y="15" width="4" height="4" fill="#0A2540" rx="0.5"/>
+    <rect x="21" y="15" width="4" height="4" fill="#B76E00" rx="0.5" opacity="0.7"/>
+    <rect x="9" y="21" width="4" height="4" fill="#B76E00" rx="0.5" opacity="0.5"/>
+    <rect x="15" y="21" width="4" height="4" fill="#B76E00" rx="0.5" opacity="0.7"/>
+    <rect x="21" y="21" width="4" height="4" fill="#B76E00" rx="0.5" opacity="0.5"/>
+  </g>
+</svg>

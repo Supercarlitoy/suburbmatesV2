@@ -1,5 +1,3 @@
-"use client";
-
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/database/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,68 +13,268 @@ import {
   Clock, 
   CheckCircle, 
   Star,
-  MessageCircle,
-  Share2,
   Building2,
   Facebook,
   Instagram,
-  Linkedin
+  Linkedin,
+  AlertTriangle
 } from "lucide-react";
 import Link from "next/link";
 import { Metadata } from "next";
-import { getThemeById, generateThemeCSS, type ProfileTheme } from "@/lib/constants/profile-themes";
-import { useEffect, useState } from "react";
-
-// Using prisma singleton from lib/prisma.ts
+import { getThemeById, generateThemeCSS } from "@/lib/constants/profile-themes";
+import { createClient } from '@/lib/supabase/server';
+import { BusinessProfileClient } from './BusinessProfileClient';
 
 interface BusinessProfileProps {
-  params: {
-    slug: string;
+  params: Promise<{ slug: string }>;
+}
+
+// Server-side data fetching function
+async function getBusinessData(slug: string) {
+  try {
+    // Get the current user to determine access level
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let isAdmin = false;
+    let isOwner = false;
+    
+    if (user) {
+      // Check if user is admin
+      const userData = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { role: true }
+      });
+      
+      isAdmin = userData?.role === 'ADMIN';
+    }
+
+    // Find business by slug with new schema
+    const business = await prisma.business.findUnique({
+      where: { slug },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            email: true,
+            role: true,
+          }
+        },
+        customization: true,
+      }
+    });
+
+    if (!business) {
+      return null;
+    }
+
+    // Check if current user is the business owner
+    if (user && business.ownerId === user.id) {
+      isOwner = true;
+    }
+
+    // Access control: Only show approved businesses to public, unless user is admin or owner
+    if (business.approvalStatus !== 'APPROVED' && !isAdmin && !isOwner) {
+      return null;
+    }
+
+    // Parse service areas via centralized helper
+    const { parseServiceAreas } = await import('@/lib/business/normalize');
+    const serviceAreas: string[] = parseServiceAreas(business.serviceAreas, business.suburb);
+
+    return {
+      id: business.id,
+      slug: business.slug,
+      name: business.name,
+      email: business.email,
+      phone: business.phone,
+      website: business.website,
+      abn: business.abn,
+      bio: business.bio,
+      suburb: business.suburb,
+      category: business.category,
+      serviceAreas,
+      themeId: business.themeId,
+      layoutId: business.layoutId,
+      headerStyle: business.headerStyle,
+      ctaText: business.ctaText,
+      ctaStyle: business.ctaStyle,
+      showTestimonials: business.showTestimonials,
+      showGallery: business.showGallery,
+      showBusinessHours: business.showBusinessHours,
+      facebookUrl: business.facebookUrl,
+      instagramUrl: business.instagramUrl,
+      linkedinUrl: business.linkedinUrl,
+      approvalStatus: business.approvalStatus,
+      abnStatus: business.abnStatus,
+      requiresVerification: business.requiresVerification,
+      qualityScore: business.qualityScore,
+      source: business.source,
+      createdAt: business.createdAt,
+      updatedAt: business.updatedAt,
+      customization: business.customization,
+      _canEdit: isOwner || isAdmin,
+      _isOwner: isOwner,
+      _isAdmin: isAdmin,
+    };
+    
+  } catch (error) {
+    console.error('Error fetching business:', error);
+    return null;
+  }
+}
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }: BusinessProfileProps): Promise<Metadata> {
+  const { slug } = await params;
+  const business = await getBusinessData(slug);
+  
+  if (!business) {
+    return {
+      title: 'Business Not Found',
+      description: 'The requested business could not be found.'
+    };
+  }
+
+  const title = `${business.name} - ${business.suburb} | SuburbMates`;
+  const description = business.bio 
+    ? `${business.bio.slice(0, 155)}...` 
+    : `Find ${business.name} in ${business.suburb}. ${business.category ? `${business.category} services` : 'Local business'} on SuburbMates.`;
+  
+  const url = `https://suburbmates.com.au/business/${business.slug}`;
+  const image = business.customization?.logoUrl || '/images/default-business.jpg';
+
+  return {
+    title,
+    description,
+    keywords: [
+      business.name,
+      business.suburb,
+      business.category || 'business',
+      'Melbourne',
+      'local business',
+      'SuburbMates'
+    ].filter(Boolean).join(', '),
+    authors: [{ name: 'SuburbMates' }],
+    creator: 'SuburbMates',
+    publisher: 'SuburbMates',
+    openGraph: {
+      type: 'website',
+      url,
+      title,
+      description,
+      images: [{
+        url: image,
+        width: 1200,
+        height: 630,
+        alt: `${business.name} profile image`
+      }],
+      siteName: 'SuburbMates',
+      locale: 'en_AU',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
+    alternates: {
+      canonical: url,
+    },
+    robots: {
+      index: business.approvalStatus === 'APPROVED',
+      follow: true,
+      googleBot: {
+        index: business.approvalStatus === 'APPROVED',
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   };
 }
 
-// Note: Metadata generation removed for client component compatibility
-// For SEO, consider implementing server-side rendering or using a separate layout
+export default async function BusinessProfilePage({ params }: BusinessProfileProps) {
+  const { slug } = await params;
+  const business = await getBusinessData(slug);
 
-export default function BusinessProfilePage({ params }: BusinessProfileProps) {
-  const [business, setBusiness] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchBusiness = async () => {
-      try {
-        const response = await fetch(`/api/business/${params.slug}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            notFound();
-          }
-          throw new Error('Failed to fetch business');
-        }
-        const data = await response.json();
-        setBusiness(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBusiness();
-  }, [params.slug]);
-
-  if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  }
-
-  if (error || !business) {
+  if (!business) {
     notFound();
   }
 
-  // Get theme configuration
+  // Generate LocalBusiness JSON-LD structured data
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: business.name,
+    description: business.bio || `${business.name} - Local business in ${business.suburb}, Melbourne`,
+    url: `https://suburbmates.com.au/business/${business.slug}`,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: business.suburb,
+      addressRegion: 'Victoria',
+      addressCountry: 'AU',
+    },
+    ...(business.phone && { telephone: business.phone }),
+    ...(business.email && { email: business.email }),
+    ...(business.website && { sameAs: [business.website] }),
+    ...(business.category && { 
+      '@type': business.category.includes('Restaurant') ? 'Restaurant' : 'LocalBusiness',
+      category: business.category 
+    }),
+    ...(business.facebookUrl || business.instagramUrl || business.linkedinUrl) && {
+      sameAs: [
+        business.website,
+        business.facebookUrl,
+        business.instagramUrl,
+        business.linkedinUrl,
+      ].filter(Boolean)
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: business.qualityScore ? (business.qualityScore / 20).toFixed(1) : '4.5',
+      bestRating: '5',
+      worstRating: '1',
+      ratingCount: business.qualityScore ? Math.floor(business.qualityScore / 10) : 25,
+    },
+    openingHoursSpecification: business.showBusinessHours ? {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '09:00',
+      closes: '17:00',
+    } : undefined,
+    areaServed: business.serviceAreas?.length ? business.serviceAreas.map(area => ({
+      '@type': 'City',
+      name: area,
+      addressRegion: 'Victoria',
+      addressCountry: 'AU',
+    })) : [{
+      '@type': 'City', 
+      name: business.suburb,
+      addressRegion: 'Victoria',
+      addressCountry: 'AU',
+    }],
+    founder: {
+      '@type': 'Organization',
+      name: 'SuburbMates',
+      url: 'https://suburbmates.com.au',
+    },
+    ...(business.abnStatus === 'VERIFIED' && business.abn && {
+      taxID: business.abn,
+      identifier: {
+        '@type': 'PropertyValue',
+        name: 'ABN',
+        value: business.abn,
+      },
+    }),
+  };
+
+  // Get theme configuration for styling
   const theme = getThemeById(business.themeId || 'corporate-blue');
   const themeCSS = theme ? generateThemeCSS(theme) : '';
 
+  // Generate business initials for avatar
   const businessInitials = business.name
     .split(' ')
     .map((word: string) => word[0])
@@ -84,27 +282,21 @@ export default function BusinessProfilePage({ params }: BusinessProfileProps) {
     .toUpperCase()
     .slice(0, 2);
 
-  const handleContactClick = () => {
-    // This would typically open a contact modal or lead form
-    console.log('Contact business:', business.id);
-  };
-
-  const handleShareClick = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: business.name,
-        text: `Check out ${business.name} on Suburbmates`,
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-    }
-  };
-
   return (
     <div className="min-h-screen" style={{ backgroundColor: theme?.colors.background || '#f8fafc' }}>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
+      />
+      
       {/* Dynamic Theme Styles */}
-      <style jsx>{themeCSS}</style>
+      {themeCSS && (
+        <style dangerouslySetInnerHTML={{ __html: themeCSS }} />
+      )}
+      
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3">
@@ -138,7 +330,7 @@ export default function BusinessProfilePage({ params }: BusinessProfileProps) {
                 {/* Business Avatar */}
                 <div className="flex-shrink-0">
                   <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
-                    <AvatarImage src={business.logo || undefined} alt={business.name} />
+                    <AvatarImage src={business.customization?.logoUrl || undefined} alt={business.name} />
                     <AvatarFallback className="text-2xl font-bold bg-primary text-white">
                       {businessInitials}
                     </AvatarFallback>
@@ -158,313 +350,187 @@ export default function BusinessProfilePage({ params }: BusinessProfileProps) {
                           {business.category}
                         </Badge>
                       )}
-                      <Badge variant="secondary" className="bg-success/10 text-success">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Verified Business
-                      </Badge>
-                      {business.abn && (
-                        <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-                          ABN Verified
+                      
+                      {/* 
+                        Badge Display Rules per directory-admin-spec.md:
+                        - "Verified" badge: Only when abnStatus = 'VERIFIED'
+                        - "Community-listed" chip: When APPROVED without ABN verification
+                      */}
+                      {business.abnStatus === 'VERIFIED' && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Verified
+                        </Badge>
+                      )}
+                      
+                      {business.approvalStatus === 'APPROVED' && business.abnStatus !== 'VERIFIED' && (
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200">
+                          <Star className="w-3 h-3 mr-1" />
+                          Community-listed
+                        </Badge>
+                      )}
+                      
+                      {/* Status badges for owner/admin view only */}
+                      {business.approvalStatus === 'PENDING' && (business._isOwner || business._isAdmin) && (
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 border-yellow-200">
+                          <Clock className="w-3 h-3 mr-1" />
+                          Pending Approval
+                        </Badge>
+                      )}
+                      
+                      {business.abnStatus === 'PENDING' && (business._isOwner || business._isAdmin) && (
+                        <Badge variant="secondary" className="bg-orange-100 text-orange-700 border-orange-200">
+                          <Clock className="w-3 h-3 mr-1" />
+                          ABN Verification Pending
+                        </Badge>
+                      )}
+                      
+                      {business.abnStatus === 'INVALID' && (business._isOwner || business._isAdmin) && (
+                        <Badge variant="destructive" className="bg-red-100 text-red-700 border-red-200">
+                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          ABN Invalid
+                        </Badge>
+                      )}
+                      
+                      {business.abnStatus === 'EXPIRED' && (business._isOwner || business._isAdmin) && (
+                        <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200">
+                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          ABN Expired
+                        </Badge>
+                      )}
+                      
+                      {/* Quality Score (for admin/owner) */}
+                      {(business._isAdmin || business._isOwner) && business.qualityScore > 0 && (
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200">
+                          <Star className="w-3 h-3 mr-1" />
+                          Quality: {business.qualityScore}%
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center text-muted-foreground mb-2">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      <span>Based in {business.suburb}, VIC</span>
-                    </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-wrap gap-3">
-                    <Button 
-                      onClick={handleContactClick} 
-                      size="lg" 
-                      className="flex-1 md:flex-none"
-                      style={{ 
-                        backgroundColor: theme?.colors.primary,
-                        borderColor: theme?.colors.primary 
-                      }}
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      {business.ctaText || 'Get Quote'}
-                    </Button>
-                    <Button variant="outline" onClick={handleShareClick}>
-                      <Share2 className="w-4 h-4 mr-2" />
-                      Share
-                    </Button>
+                  {business.bio && (
+                    <CardDescription className="text-lg text-gray-700 leading-relaxed">
+                      {business.bio}
+                    </CardDescription>
+                  )}
+
+                  {/* Location */}
+                  <div className="flex items-center text-gray-600">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    <span>{business.suburb}, Victoria</span>
                   </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col gap-2 md:w-auto w-full">
+          <BusinessProfileClient business={{ id: business.id, name: business.name, ctaText: business.ctaText || undefined }} />
                 </div>
               </div>
             </CardHeader>
           </Card>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Main Content */}
-            <div className="md:col-span-2 space-y-6">
-              {/* About Section */}
-              {business.bio && (
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building2 className="w-5 h-5" />
-                      About {business.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 leading-relaxed">
-                      {business.bio}
-                    </p>
-                  </CardContent>
-                </Card>
+          {/* Contact Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Phone className="w-5 h-5" />
+                Contact Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {business.phone && (
+                <div className="flex items-center gap-3">
+                  <Phone className="w-4 h-4 text-gray-400" />
+                  <span>{business.phone}</span>
+                </div>
               )}
-
-              {/* Service Areas */}
-              {business.serviceAreas.length > 0 && (
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5" />
-                      Service Areas
-                    </CardTitle>
-                    <CardDescription>
-                      We provide services in the following Melbourne suburbs:
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {business.serviceAreas.map((suburb: string) => (
-                        <Badge 
-                          key={suburb} 
-                          variant="outline" 
-                          className="bg-blue-50 text-blue-700 border-blue-200"
-                        >
-                          {suburb}
-                        </Badge>
-                      ))}
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-3">
-                      Serving {business.serviceAreas.length} suburb{business.serviceAreas.length !== 1 ? 's' : ''} across Melbourne
-                    </p>
-                  </CardContent>
-                </Card>
+              
+              <div className="flex items-center gap-3">
+                <Mail className="w-4 h-4 text-gray-400" />
+                <span>{business.email}</span>
+              </div>
+              
+              {business.website && (
+                <div className="flex items-center gap-3">
+                  <Globe className="w-4 h-4 text-gray-400" />
+                  <a 
+                    href={business.website} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    Visit Website
+                  </a>
+                </div>
               )}
-
-              {/* Gallery Section */}
-              {business.showGallery && (
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building2 className="w-5 h-5" />
-                      Gallery
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {/* Placeholder gallery items */}
-                      {[1, 2, 3, 4, 5, 6].map((item) => (
-                        <div 
-                          key={item}
-                          className="aspect-square bg-muted rounded-lg flex items-center justify-center"
-                        >
-                          <Building2 className="w-8 h-8 text-muted-foreground" />
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-3 text-center">
-                      Gallery coming soon! Upload photos in your dashboard.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Reviews Section */}
-              {business.showTestimonials && (
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Star className="w-5 h-5" />
-                      Customer Reviews
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Star className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p>No reviews yet. Be the first to review {business.name}!</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Contact Information */}
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle>Contact Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {business.phone && (
-                    <div className="flex items-center gap-3">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium">{business.phone}</p>
-                        <p className="text-sm text-muted-foreground">Phone</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <p className="font-medium">{business.email}</p>
-                      <p className="text-sm text-muted-foreground">Email</p>
-                    </div>
-                  </div>
-
-                  {business.website && (
-                    <div className="flex items-center gap-3">
-                      <Globe className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <Link 
-                          href={business.website} 
-                          target="_blank" 
-                          className="font-medium text-primary hover:underline"
-                        >
-                          Visit Website
-                        </Link>
-                        <p className="text-sm text-muted-foreground">Website</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <Separator />
-                  
-                  <Button onClick={handleContactClick} className="w-full">
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Send Message
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Business Hours */}
-              {business.showBusinessHours && (
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Clock className="w-5 h-5" />
-                      Business Hours
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Monday - Friday</span>
-                        <span className="text-muted-foreground">9:00 AM - 5:00 PM</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Saturday</span>
-                        <span className="text-muted-foreground">9:00 AM - 2:00 PM</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Sunday</span>
-                        <span className="text-muted-foreground">Closed</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-3">
-                      Hours may vary. Please contact for confirmation.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
+              
               {/* Social Media Links */}
               {(business.facebookUrl || business.instagramUrl || business.linkedinUrl) && (
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle>Follow Us</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-3">
-                      {business.facebookUrl && (
-                        <Link href={business.facebookUrl} target="_blank" className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
-                          <Facebook className="w-5 h-5" />
-                        </Link>
-                      )}
-                      {business.instagramUrl && (
-                        <Link href={business.instagramUrl} target="_blank" className="p-2 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors">
-                          <Instagram className="w-5 h-5" />
-                        </Link>
-                      )}
-                      {business.linkedinUrl && (
-                        <Link href={business.linkedinUrl} target="_blank" className="p-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
-                          <Linkedin className="w-5 h-5" />
-                        </Link>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <>
+                  <Separator className="my-4" />
+                  <div className="flex items-center gap-4">
+                    {business.facebookUrl && (
+                      <a 
+                        href={business.facebookUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <Facebook className="w-5 h-5" />
+                      </a>
+                    )}
+                    {business.instagramUrl && (
+                      <a 
+                        href={business.instagramUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-pink-600 hover:text-pink-700"
+                      >
+                        <Instagram className="w-5 h-5" />
+                      </a>
+                    )}
+                    {business.linkedinUrl && (
+                      <a 
+                        href={business.linkedinUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-700 hover:text-blue-800"
+                      >
+                        <Linkedin className="w-5 h-5" />
+                      </a>
+                    )}
+                  </div>
+                </>
               )}
+            </CardContent>
+          </Card>
 
-              {/* Trust Signals */}
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle>Trust & Safety</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="w-4 h-4 text-success" />
-                    <span>Identity Verified</span>
-                  </div>
-                  {business.abn && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-success" />
-                      <span>ABN Verified</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="w-4 h-4 text-success" />
-                    <span>Suburbmates Member</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          {/* Service Areas */}
+          {business.serviceAreas && business.serviceAreas.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  Service Areas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {business.serviceAreas.map((area: string) => (
+                    <Badge key={area} variant="outline">
+                      {area}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
-
-      {/* Footer with Suburbmates Branding */}
-      <footer className="border-t bg-white/80 backdrop-blur-sm mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center gap-2 text-muted-foreground">
-              <span className="text-sm">Powered by</span>
-              <Link href="/" className="font-bold text-primary hover:underline">
-                Suburbmates
-              </Link>
-            </div>
-            <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              Connecting Melbourne's business community. Find trusted local businesses 
-              and grow your network with Suburbmates.
-            </p>
-            <div className="flex justify-center gap-4 text-xs text-muted-foreground">
-              <Link href="/about" className="hover:text-primary">
-                About
-              </Link>
-              <Link href="/signup" className="hover:text-primary">
-                List Your Business
-              </Link>
-              <Link href="/search" className="hover:text-primary">
-                Find Businesses
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
 
-// Cleanup Prisma connection
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate every hour

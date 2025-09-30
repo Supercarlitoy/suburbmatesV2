@@ -1,10 +1,17 @@
 import { Resend } from 'resend'
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY is not set')
-}
+// Lazy-loaded Resend instance
+let resend: Resend | null = null;
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend(): Resend {
+  if (!resend) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not set');
+    }
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 // Email templates for SuburbMates
 export const emailTemplates = {
@@ -137,7 +144,7 @@ export const emailTemplates = {
 // Email sending functions
 export async function sendWelcomeEmail(to: string, name: string) {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'SuburbMates <noreply@suburbmates.com.au>',
       to: [to],
       subject: emailTemplates.welcome.subject,
@@ -159,7 +166,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
 
 export async function sendEmailConfirmation(to: string, confirmationLink: string, businessName?: string) {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'SuburbMates <noreply@suburbmates.com.au>',
       to: [to],
       subject: emailTemplates.emailConfirmation.subject,
@@ -184,7 +191,7 @@ export async function sendContactFormEmail(
   formData: { name: string; email: string; subject: string; message: string; company?: string }
 ) {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'SuburbMates Contact Form <noreply@suburbmates.com.au>',
       to: [adminEmail],
       subject: emailTemplates.contactForm.subject,
@@ -209,7 +216,7 @@ export async function sendLeadNotificationEmail(
   leadData: { firstName: string; lastName: string; email: string; company: string; source: string }
 ) {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'SuburbMates Leads <noreply@suburbmates.com.au>',
       to: [adminEmail],
       subject: emailTemplates.leadNotification.subject,
@@ -230,7 +237,7 @@ export async function sendLeadNotificationEmail(
 
 export async function sendPasswordResetEmail(to: string, resetLink: string) {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: 'SuburbMates Security <noreply@suburbmates.com.au>',
       to: [to],
       subject: emailTemplates.passwordReset.subject,

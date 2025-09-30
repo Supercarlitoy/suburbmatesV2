@@ -6,15 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Users, MapPin, Award, Shield, Zap } from "lucide-react";
 import Link from "next/link";
+import { glass, useStandardAnimations } from "@/lib/design-system";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const glass = {
-  shell: "bg-white/5 backdrop-blur-2xl border border-white/10",
-  light: "bg-white/90 text-gray-900 backdrop-blur-2xl border border-white/20",
-  gradientText: "bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent",
-  heroBg: "bg-gradient-to-br from-slate-50 via-blue-50 to-green-50",
-};
 
 export default function AboutPage() {
+  const { fadeInUp } = useStandardAnimations();
   const stats = [
     { number: "500+", label: "Melbourne Businesses", icon: Users },
     { number: "50+", label: "Suburbs Covered", icon: MapPin },
@@ -55,9 +52,9 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Badge className="mb-6 bg-primary/10 text-primary border-primary/20">
+            <StatusBadge variant="blue" size="md" className="mb-6">
               About SuburbMates
-            </Badge>
+            </StatusBadge>
             <h1 className="text-5xl lg:text-6xl font-black mb-6">
               <span className="block text-gray-900">Connecting</span>
               <span className={`${glass.gradientText} block`}>Melbourne's Communities</span>
@@ -119,9 +116,9 @@ export default function AboutPage() {
                 every connection is built on trust, quality, and local pride.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Badge className="bg-green-100 text-green-800">✓ ABR Integrated</Badge>
-                <Badge className="bg-blue-100 text-blue-800">✓ Melbourne Focused</Badge>
-                <Badge className="bg-purple-100 text-purple-800">✓ Community Driven</Badge>
+                <StatusBadge variant="green" size="sm">✓ ABR Integrated</StatusBadge>
+                <StatusBadge variant="blue" size="sm">✓ Melbourne Focused</StatusBadge>
+                <StatusBadge variant="purple" size="sm">✓ Community Driven</StatusBadge>
               </div>
             </motion.div>
             <motion.div

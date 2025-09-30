@@ -41,17 +41,17 @@ export function SuburbMultiSelect({
   const [searchValue, setSearchValue] = React.useState("");
 
   const filteredSuburbs = MELBOURNE_SUBURBS.filter(suburb =>
-    suburb.toLowerCase().includes(searchValue.toLowerCase())
+    suburb.name.toLowerCase().includes(searchValue.toLowerCase())
   );
 
-  const handleSelect = (suburb: string) => {
-    if (value.includes(suburb)) {
+  const handleSelect = (suburbName: string) => {
+    if (value.includes(suburbName)) {
       // Remove suburb
-      onChange(value.filter(s => s !== suburb));
+      onChange(value.filter(s => s !== suburbName));
     } else {
       // Add suburb (check max selections)
       if (!maxSelections || value.length < maxSelections) {
-        onChange([...value, suburb]);
+        onChange([...value, suburbName]);
       }
     }
   };
@@ -99,14 +99,14 @@ export function SuburbMultiSelect({
             <CommandGroup>
               <ScrollArea className="h-60">
                 {filteredSuburbs.map((suburb) => {
-                  const isSelected = value.includes(suburb);
+                  const isSelected = value.includes(suburb.name);
                   const isDisabled = !isSelected && !!maxSelections && value.length >= maxSelections;
                   
                   return (
                     <CommandItem
-                      key={suburb}
-                      value={suburb}
-                      onSelect={() => handleSelect(suburb)}
+                      key={suburb.id}
+                      value={suburb.name}
+                      onSelect={() => handleSelect(suburb.name)}
                       disabled={isDisabled}
                       className={cn(
                         "cursor-pointer",
@@ -119,7 +119,7 @@ export function SuburbMultiSelect({
                           isSelected ? "opacity-100" : "opacity-0"
                         )}
                       />
-                      {suburb}
+                      {suburb.name}
                     </CommandItem>
                   );
                 })}

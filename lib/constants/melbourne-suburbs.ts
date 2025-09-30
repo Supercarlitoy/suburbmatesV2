@@ -5,8 +5,23 @@
  * Import this file anywhere suburb data is needed to ensure consistency across the platform.
  */
 
+export interface MelbourneSuburb {
+  id: string;
+  name: string;
+  region?: string;
+}
+
+// Helper function to create suburb object
+function createSuburb(name: string, region?: string): MelbourneSuburb {
+  return {
+    id: name.toLowerCase().replace(/\s+/g, '-'),
+    name,
+    region
+  };
+}
+
 // Comprehensive Melbourne suburbs list (Inner, Middle, and Outer Melbourne)
-export const MELBOURNE_SUBURBS = [
+const SUBURB_NAMES = [
   // Inner Melbourne
   "Abbotsford", "Albert Park", "Carlton", "Carlton North", "Collingwood", "Cremorne",
   "Docklands", "East Melbourne", "Fitzroy", "Fitzroy North", "Flemington", "Kensington",
@@ -81,6 +96,9 @@ export const MELBOURNE_SUBURBS = [
   "Sunshine West", "Sydenham", "Tarneit", "Truganina", "Werribee", "Werribee South",
   "Williams Landing"
 ].sort();
+
+// Create the structured suburbs array
+export const MELBOURNE_SUBURBS: MelbourneSuburb[] = SUBURB_NAMES.map(name => createSuburb(name));
 
 // Organized by regions for easier filtering
 export const MELBOURNE_SUBURBS_BY_REGION = {
@@ -165,16 +183,16 @@ export const getSuburbsByRegion = (region: keyof typeof MELBOURNE_SUBURBS_BY_REG
 };
 
 export const isValidMelbourneSuburb = (suburb: string): boolean => {
-  return MELBOURNE_SUBURBS.includes(suburb);
+  return MELBOURNE_SUBURBS.some(s => s.name === suburb);
 };
 
 export const searchSuburbs = (query: string): string[] => {
-  if (!query.trim()) return MELBOURNE_SUBURBS;
+  if (!query.trim()) return MELBOURNE_SUBURBS.map(s => s.name);
   
   const searchTerm = query.toLowerCase().trim();
-  return MELBOURNE_SUBURBS.filter(suburb => 
-    suburb.toLowerCase().includes(searchTerm)
-  );
+  return MELBOURNE_SUBURBS
+    .map(s => s.name)
+    .filter(name => name.toLowerCase().includes(searchTerm));
 };
 
 export const getSuburbRegion = (suburb: string): string | null => {

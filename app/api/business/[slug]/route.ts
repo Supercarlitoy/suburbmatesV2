@@ -10,7 +10,7 @@ export async function GET(
     const business = await prisma.business.findUnique({
       where: { slug },
       include: {
-        user: {
+        owner: {
           select: {
             email: true
           }
@@ -18,7 +18,7 @@ export async function GET(
       }
     });
 
-    if (!business || business.status !== 'APPROVED') {
+    if (!business || business.approvalStatus !== 'APPROVED') {
       return NextResponse.json(
         { error: 'Business not found' },
         { status: 404 }

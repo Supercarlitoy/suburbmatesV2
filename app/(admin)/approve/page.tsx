@@ -17,7 +17,7 @@ interface PendingBusiness {
   email: string;
   suburb: string;
   phone?: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: string;
   user?: {
     email: string;
@@ -79,7 +79,7 @@ export default function AdminApprovePage() {
         // Update local state
         setBusinesses(prev => prev.map(business => 
           business.id === businessId 
-            ? { ...business, status: action === 'approve' ? 'APPROVED' : 'REJECTED' }
+            ? { ...business, approvalStatus: action === 'approve' ? 'APPROVED' : 'REJECTED' }
             : business
         ));
       } else {
@@ -100,8 +100,8 @@ export default function AdminApprovePage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const getStatusBadge = (approvalStatus: string) => {
+    switch (approvalStatus) {
       case 'PENDING':
         return <Badge variant="secondary" className="bg-warning/10 text-warning"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
       case 'APPROVED':
@@ -109,13 +109,13 @@ export default function AdminApprovePage() {
       case 'REJECTED':
         return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge variant="outline">{approvalStatus}</Badge>;
     }
   };
 
-  const pendingBusinesses = businesses.filter(b => b.status === 'PENDING');
-  const approvedBusinesses = businesses.filter(b => b.status === 'APPROVED');
-  const rejectedBusinesses = businesses.filter(b => b.status === 'REJECTED');
+  const pendingBusinesses = businesses.filter(b => b.approvalStatus === 'PENDING');
+  const approvedBusinesses = businesses.filter(b => b.approvalStatus === 'APPROVED');
+  const rejectedBusinesses = businesses.filter(b => b.approvalStatus === 'REJECTED');
 
   if (loading) {
     return (
@@ -189,7 +189,7 @@ export default function AdminApprovePage() {
                         <span>{new Date(business.createdAt).toLocaleDateString()}</span>
                       </CardDescription>
                     </div>
-                    {getStatusBadge(business.status)}
+                    {getStatusBadge(business.approvalStatus)}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -254,7 +254,7 @@ export default function AdminApprovePage() {
                     <CardTitle className="text-xl">{business.name}</CardTitle>
                     <CardDescription>{business.suburb} • {business.email}</CardDescription>
                   </div>
-                  {getStatusBadge(business.status)}
+                  {getStatusBadge(business.approvalStatus)}
                 </div>
               </CardHeader>
             </Card>
@@ -270,7 +270,7 @@ export default function AdminApprovePage() {
                     <CardTitle className="text-xl">{business.name}</CardTitle>
                     <CardDescription>{business.suburb} • {business.email}</CardDescription>
                   </div>
-                  {getStatusBadge(business.status)}
+                  {getStatusBadge(business.approvalStatus)}
                 </div>
               </CardHeader>
             </Card>

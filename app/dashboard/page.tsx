@@ -124,11 +124,11 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Badge 
-                    variant={business.status === 'APPROVED' ? 'default' : 'secondary'}
+                    variant={business.approvalStatus === 'APPROVED' ? 'default' : 'secondary'}
                   >
-                    {business.status}
+                    {business.approvalStatus}
                   </Badge>
-                  {business.status === 'APPROVED' && (
+                  {business.approvalStatus === 'APPROVED' && (
                     <span className="text-sm text-green-600">✓ Live</span>
                   )}
                 </div>

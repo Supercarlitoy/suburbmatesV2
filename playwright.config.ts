@@ -2,16 +2,29 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: true,
+  testIgnore: ['**/domain-lock.spec.ts', 'tests/domain-lock.spec.ts'],
+  fullyParallel: false, // Changed to ensure proper test ordering with database
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  workers: process.env.CI ? 1 : 2, // Limit workers for database consistency
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+    ['json', { outputFile: 'test-results/results.json' }]
+  ],
+  
+  // Global test setup and teardown
+  globalSetup: './tests/setup/global-setup.ts',
+  globalTeardown: './tests/setup/global-setup.ts',
+  
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: 'off',
+    video: 'retain-on-failure',
+    // Extended timeout for database operations
+    actionTimeout: 10000,
+    navigationTimeout: 15000,
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, TrendingUp } from "lucide-react";
 import { Marquee } from "@/components/magicui/marquee";
 import Link from "next/link";
+import { SuburbMatesLogo } from "@/components/ui/SuburbMatesLogo";
 
 // Reusable Components
 import { Navigation } from "@/components/shared/Navigation";
@@ -161,7 +162,7 @@ export default function HomePage() {
       {/* SOCIAL PROOF */}
        <section className="py-20 bg-white overflow-hidden" aria-labelledby="social-proof">
          <div className="container mx-auto px-4">
-           <div className="text-centre mb-12">
+           <div className="text-center mb-12">
               <h2 id="social-proof" className="text-4xl font-bold text-gray-900">Trusted by 500+ Melbourne Businesses</h2>
               <p className="text-lg text-gray-600">See what local business owners are saying</p>
             </div>
@@ -180,18 +181,74 @@ export default function HomePage() {
 
        {/* FOOTER */}
        <footer className="border-t bg-gray-50 py-10" aria-labelledby="footer">
-         <div className="container mx-auto px-4 text-centre space-y-4">
+         <div className="container mx-auto px-4 text-center space-y-4">
            <h2 id="footer" className="sr-only">Footer</h2>
-           <div className="flex items-centre justify-centre gap-2 text-muted-foreground">
+           <div className="flex items-center justify-center gap-2 text-muted-foreground mb-4">
              <span className="text-sm">Powered by</span>
-             <div className="flex items-centre gap-2">
-               <div className="w-6 h-6 bg-primary rounded text-white text-xs grid place-items-centre font-bold">S</div>
-               <span className="font-bold text-primary">SuburbMates</span>
-             </div>
+             <SuburbMatesLogo variant="FooterLogo" size="xs" />
            </div>
-           <p className="text-xs text-muted-foreground max-w-md mx-auto">
+           <p className="text-xs text-muted-foreground max-w-md mx-auto mb-6">
              Connecting Melbourne's business community. Building trust through verification and local focus.
            </p>
+           
+           {/* Footer Links */}
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-sm">
+             <div className="space-y-2">
+               <h3 className="font-semibold text-gray-900">Platform</h3>
+               <Link href="/search" className="block text-gray-600 hover:text-primary transition-colors">
+                 Find Businesses
+               </Link>
+               <Link href="/register-business" className="block text-gray-600 hover:text-primary transition-colors">
+                 List Your Business
+               </Link>
+               <Link href="/claim" className="block text-gray-600 hover:text-primary transition-colors">
+                 Claim Business
+               </Link>
+               <Link href="/pricing" className="block text-gray-600 hover:text-primary transition-colors">
+                 Pricing
+               </Link>
+             </div>
+             <div className="space-y-2">
+               <h3 className="font-semibold text-gray-900">Company</h3>
+               <Link href="/about" className="block text-gray-600 hover:text-primary transition-colors">
+                 About Us
+               </Link>
+               <Link href="/contact" className="block text-gray-600 hover:text-primary transition-colors">
+                 Contact
+               </Link>
+               <Link href="/help" className="block text-gray-600 hover:text-primary transition-colors">
+                 Help Center
+               </Link>
+               <Link href="/status" className="block text-gray-600 hover:text-primary transition-colors">
+                 System Status
+               </Link>
+             </div>
+             <div className="space-y-2">
+               <h3 className="font-semibold text-gray-900">Legal</h3>
+               <Link href="/terms" className="block text-gray-600 hover:text-primary transition-colors">
+                 Terms of Service
+               </Link>
+               <Link href="/privacy" className="block text-gray-600 hover:text-primary transition-colors">
+                 Privacy Policy
+               </Link>
+             </div>
+             <div className="space-y-2">
+               <h3 className="font-semibold text-gray-900">Account</h3>
+               <Link href="/login" className="block text-gray-600 hover:text-primary transition-colors">
+                 Sign In
+               </Link>
+               <Link href="/signup" className="block text-gray-600 hover:text-primary transition-colors">
+                 Sign Up
+               </Link>
+               <Link href="/dashboard" className="block text-gray-600 hover:text-primary transition-colors">
+                 Dashboard
+               </Link>
+             </div>
+           </div>
+           
+           <div className="pt-6 border-t border-gray-200 text-xs text-gray-500">
+             © 2024 SuburbMates. All rights reserved. Made with ❤️ in Melbourne.
+           </div>
          </div>
        </footer>
 
@@ -199,8 +256,8 @@ export default function HomePage() {
       {showExitIntent && (
         <div className="fixed inset-0 bg-black/80 z-[60] grid place-items-center p-4" role="dialog" aria-modal="true" aria-label="Join today for free leads" onClick={() => setShowExitIntent(false)}>
           <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="text-centre">
-              <div className="w-16 h-16 bg-red-100 rounded-full grid place-items-centre mx-auto mb-4 text-2xl" aria-hidden>🎁</div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full grid place-items-center mx-auto mb-4 text-2xl" aria-hidden>🎁</div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Wait! Don't Miss Out!</h3>
               <p className="text-gray-600 mb-6">Get your first 5 leads absolutely free when you join today.</p>
               <Link href="/signup">

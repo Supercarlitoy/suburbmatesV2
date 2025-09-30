@@ -1,0 +1,6 @@
+to,subject,businessName,type
+owner@johnsons-cafe.com,🎉 Welcome to SuburbMates - {businessName} is Live!,Johnson's Cafe,welcome
+sarah@fitness-zone.com,🎉 Welcome to SuburbMates - {businessName} is Live!,Fitness Zone,welcome
+mike@plumbing-pro.com,📊 Weekly Digest - {businessName} Performance,Pro Plumbing Services,welcome
+info@bella-salon.com,🎉 Welcome to SuburbMates - {businessName} is Live!,Bella Hair Salon,welcome
+contact@green-gardens.com,🔥 New Customer Inquiry for {businessName},Green Gardens Landscaping,inquiry

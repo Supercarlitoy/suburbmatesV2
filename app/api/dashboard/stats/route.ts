@@ -15,9 +15,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user's business profile
-    const business = await prisma.business.findUnique({
+    const business = await prisma.business.findFirst({
       where: {
-        userId: session.user.id,
+        ownerId: session.user.id,
       },
     });
 

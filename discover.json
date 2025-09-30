@@ -1,0 +1,13 @@
+{
+  "start": [
+    "/"
+  ],
+  "count": 1,
+  "nodes": [
+    {
+      "url": "/",
+      "status": 200,
+      "title": "SuburbMates - Melbourne Business Community Platform"
+    }
+  ]
+}

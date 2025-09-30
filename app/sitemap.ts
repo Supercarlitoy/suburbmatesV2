@@ -1,22 +1,18 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
+import { BUSINESS_CATEGORIES } from '@/lib/constants/business-categories';
+import { MELBOURNE_SUBURBS } from '@/lib/constants/melbourne-suburbs';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://suburbmates.com.au';
 
-  // Static pages
+  // Static pages - only core indexable pages
   const staticPages = [
     {
       url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 1,
-    },
-    {
-      url: `${baseUrl}/businesses`,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 0.8,
     },
     {
       url: `${baseUrl}/search`,
@@ -31,29 +27,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     },
     {
-      url: `${baseUrl}/contact`,
+      url: `${baseUrl}/help`,
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
-      priority: 0.5,
+      priority: 0.4,
     },
     {
-      url: `${baseUrl}/register-business`,
+      url: `${baseUrl}/privacy`,
       lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
     },
   ];
 
   // Get all published/approved businesses
   const businesses = await prisma.business.findMany({
     where: {
-      status: 'APPROVED',
+      approvalStatus: 'APPROVED',
       // Only include businesses that have basic required fields
       name: {
-        not: null,
-      },
-      slug: {
-        not: null,
+        not: '',
       },
     },
     select: {
@@ -73,54 +66,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9, // High priority for business profiles
   }));
 
-  // Get unique suburbs for location pages
-  const suburbs = await prisma.business.findMany({
-    where: {
-      status: 'APPROVED',
-    },
-    select: {
-      suburb: true,
-    },
-    distinct: ['suburb'],
-  });
-
-  // Generate suburb-specific pages
-  const suburbPages = suburbs.map(({ suburb }) => ({
-    url: `${baseUrl}/businesses?suburb=${encodeURIComponent(suburb)}`,
+  // Generate category landing pages
+  const categoryPages = BUSINESS_CATEGORIES.map(category => ({
+    url: `${baseUrl}/category/${category.id}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
-    priority: 0.6,
+    priority: 0.8, // High priority for category pages
   }));
 
-  // Get unique categories for category pages
-  const categories = await prisma.business.findMany({
-    where: {
-      status: 'APPROVED',
-      category: {
-        not: null,
-      },
-    },
-    select: {
-      category: true,
-    },
-    distinct: ['category'],
-  });
-
-  // Generate category-specific pages
-  const categoryPages = categories.map(({ category }) => ({
-    url: `${baseUrl}/businesses?category=${encodeURIComponent(category || '')}`,
+  // Generate suburb landing pages (top suburbs only to start)
+  const topSuburbs = ['richmond', 'fitzroy', 'hawthorn', 'st-kilda', 'prahran', 'carlton', 'south-yarra', 'brunswick', 'collingwood', 'northcote'];
+  const suburbPages = topSuburbs.map(suburbSlug => ({
+    url: `${baseUrl}/suburb/${suburbSlug}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
-    priority: 0.6,
+    priority: 0.7, // Medium-high priority for suburb pages
   }));
+
+  // Note: Parameterized URLs (/search?category=X&suburb=Y) are excluded
+  // from sitemap to avoid crawl bloat. These are handled by page-level
+  // noindex,follow meta tags instead.
+  //
+  // Static landing pages (/category/plumbing, /suburb/richmond) provide
+  // clean SEO-friendly URLs with rich content for search engines.
 
   return [
     ...staticPages,
     ...businessPages,
-    ...suburbPages,
     ...categoryPages,
+    ...suburbPages,
   ];
 }
 
-// Revalidate sitemap every hour
+// Revalidate sitemap every hour to catch new business profiles
+// This focuses on high-quality, indexable content only
 export const revalidate = 3600;

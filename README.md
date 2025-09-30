@@ -1,59 +1,116 @@
 # SuburbMates - Melbourne Business Community Platform
 
-A modern, full-stack platform connecting Melbourne businesses with local residents through verified profiles, smart search, and community engagement.
+A comprehensive platform connecting Melbourne businesses with local residents through verified profiles, intelligent search, lead generation, and community engagement.
 
 ## 🎯 Platform Overview
 
 SuburbMates is a dual-audience platform designed for:
-- **Business Owners**: Create verified profiles, manage listings, capture leads
-- **Local Residents**: Discover trusted businesses, read reviews, connect with services
+- **Business Owners**: Create verified profiles, claim existing listings, manage leads, and build local presence
+- **Local Residents**: Discover trusted Melbourne businesses, submit inquiries, and connect with local services
 
 ### Key Features
-- ✅ **ABN Verification System** - AI-assisted verification with admin approval
-- ✅ **Smart Search** - Suburb-specific business discovery
-- ✅ **Profile Customization** - Professional business profiles
-- ✅ **Lead Management** - Connect residents with businesses
-- ✅ **Admin Dashboard** - Quality control and approval workflow
-- ✅ **Mobile Responsive** - Optimized for all devices
+
+- ✅ **Professional Business Profiles** - Customizable profiles with social sharing and embeds
+- ✅ **ABN Verification System** - Australian Business Number verification through ABR API
+- ✅ **Melbourne-Focused Search** - Suburb and category-specific business discovery
+- ✅ **Lead Management** - Customer inquiries with email notifications
+- ✅ **Advanced Admin Dashboard** - Multi-tab interface with bulk operations and approval workflows
+- ✅ **AI-Powered Automation** - Business verification and content moderation with AI assistance
+- ✅ **Quality Scoring System** - Algorithm-based business profile scoring (0-100)
+- ✅ **Directory Management** - Import/export, deduplication, and bulk operations
+- ✅ **Location Services** - Mapbox integration with geocoding and interactive maps
+- ✅ **Comprehensive Email System** - Professional email notifications via Resend
+- ✅ **CLI-to-Web Bridge** - Enterprise-grade web interface for CLI operations with real-time progress tracking
+- ✅ **AI Automation Integration** - Comprehensive AI-powered business approval system with decision review and performance optimization
 
 ## 🚀 Tech Stack
 
 ### Core Framework
-- **Next.js 15** - App Router, SSR/SSG, API routes
-- **TypeScript** - Full type safety throughout
+- **Next.js 15** - App Router, SSR/SSG, API routes, server actions
+- **TypeScript** - Full type safety throughout the codebase
 - **React 19** - Latest React features and improvements
+- **Prisma** - Type-safe database client with PostgreSQL
 
 ### Styling & UI
 - **Tailwind CSS** - Utility-first CSS framework
 - **Shadcn/ui** - Beautiful, accessible component library
 - **Radix UI** - Unstyled, accessible UI primitives
-- **Lucide React** - Consistent icon system
-- **Glass Card Design** - Modern, professional UI
+- **MagicUI** - Enhanced UI components like marquee
+- **Glass Card Design** - Modern, professional UI components
 
-### Backend & Database
+### Authentication & Backend
 - **Supabase** - Authentication, PostgreSQL database
-- **Prisma** - Type-safe database client
 - **Edge Functions** - Serverless API endpoints
+- **Middleware** - Auth protection and role-based access
+- **Resend** - Professional email service with custom templates
+- **Upstash Redis** - Rate limiting, feature flags, and caching
 
-### Business Logic
-- **ABR API Integration** - Australian Business Register verification
-- **AI-Assisted Verification** - Smart business validation
-- **Email Notifications** - Resend for transactional emails
+### Business & Directory Features
+- **ABN Verification** - Australian Business Register API integration
+- **AI-Assisted Automation** - Intelligent business verification
+- **CSV Operations** - Import/export with validation and field mapping
+- **Quality Scoring** - Profile completeness algorithm (0-100)
+- **Mapbox Integration** - Geocoding and interactive maps
 
 ### State Management & Validation
 - **Zustand** - Lightweight state management
 - **Zod** - TypeScript-first schema validation
-- **React Hook Form** - Performant forms
+- **React Hook Form** - Performant form handling
 
-### Testing & Quality
-- **Jest** - JavaScript testing framework
-- **Testing Library** - Component testing utilities
-- **TypeScript** - Compile-time error checking
+### Analytics & Monitoring
+- **GA4** - Client + server-side tracking
+- **Audit Logging** - Comprehensive action tracking
+- **Sentry** - Error monitoring and reporting
 
-### Development & Deployment
-- **Vercel** - Optimized deployment platform
-- **ESLint** - Code linting and formatting
-- **PostCSS** - CSS processing
+## 📄 Core Workflows
+
+### Business Owner Workflows
+
+#### Workflow 1: Create New Business Profile
+1. Business owner discovers they're not listed on SuburbMates
+2. Creates new profile through guided multi-step wizard
+3. Verifies with ABN (optional but recommended)
+4. Sets up profile details, contact info, and service areas
+5. Receives admin approval
+6. Customizes profile with branding, content, and services
+7. Shares profile through various channels
+8. Receives and manages leads through dashboard
+
+#### Workflow 2: Claim Existing Business
+1. Business owner finds their business already listed
+2. Initiates claim process
+3. Verifies ownership through various methods:
+   - Email domain matching
+   - Phone verification
+   - Document upload
+   - ABN verification
+4. Admin reviews and approves claim
+5. Business owner receives ownership notification
+6. Takes control of existing profile with full customization
+7. Manages leads and content through dashboard
+
+### Admin Management Workflows
+
+#### Business Approval Workflow
+1. Admin reviews pending businesses
+2. Verifies business legitimacy and content
+3. Approves or rejects with reason
+4. System notifies business owner via email
+5. Approved businesses become visible in search
+
+#### Claim Verification Workflow
+1. Admin reviews ownership claims
+2. Checks evidence provided by claimant
+3. Verifies against existing business record
+4. Approves or rejects claim with notes
+5. System transfers ownership and notifies parties
+
+#### Quality Management Workflow
+1. System calculates quality scores (0-100)
+2. Admin reviews low-quality businesses
+3. Provides improvement recommendations
+4. Monitors score improvements over time
+5. Prioritizes businesses for enhancement
 
 ## 🏗️ Project Structure
 
@@ -64,15 +121,21 @@ suburbmates/
 ├── app/                          # Next.js App Router
 │   ├── (admin)/                  # Admin dashboard routes
 │   ├── (auth)/                   # Authentication routes
-│   ├── dashboard/               # Business dashboard
+│   ├── dashboard/                # Business dashboard
 │   ├── (marketing)/              # Marketing pages
 │   ├── api/                      # API routes
+│   │   ├── admin/                # Admin API endpoints
+│   │   ├── auth/                 # Auth endpoints
+│   │   ├── business/            # Business operations
+│   │   ├── quality-scoring/      # Quality score endpoints
+│   │   ├── ai-automation/        # AI automation endpoints
+│   │   └── csv-operations/       # CSV import/export endpoints
 │   ├── business/[slug]/          # Public business profiles
 │   ├── search/                   # Search interface
 │   └── feed/                     # Community feed
 │
 ├── features/                     # Feature-based modules
-│   ├── authentication/          # Auth logic & components
+│   ├── authentication/           # Auth logic & components
 │   ├── business-profiles/        # Profile management
 │   ├── verification/             # ABN verification system
 │   ├── search-discovery/         # Search functionality
@@ -132,14 +195,15 @@ suburbmates/
 
 3. **Set up environment variables**
    ```bash
-   cp .env.local.example .env.local
+   cp .env.example .env.local
    ```
    
    Fill in your environment variables:
    - Supabase URL and keys
    - Resend API key
    - Database URL
-   - NextAuth secret
+   - ABR API key
+   - Other required keys
 
 4. **Run the development server**
    ```bash
@@ -259,12 +323,25 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 # Resend
 RESEND_API_KEY=your_resend_api_key
 
-# Next.js
-NEXTAUTH_SECRET=your_nextauth_secret
-NEXTAUTH_URL=http://localhost:3000
-
 # Database
 DATABASE_URL=your_database_url
+
+# ABR API
+ABR_API_KEY=your_abr_api_key
+
+# Google Analytics
+NEXT_PUBLIC_GA4_MEASUREMENT_ID=your_ga4_id
+GA4_API_SECRET=your_ga4_secret
+
+# Redis
+UPSTASH_REDIS_REST_URL=your_redis_url
+UPSTASH_REDIS_REST_TOKEN=your_redis_token
+
+# Mapbox (Optional)
+NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token
+
+# Admin Settings
+ADMIN_EMAILS=comma,separated,admin,emails
 ```
 
 ## 🤝 Contributing

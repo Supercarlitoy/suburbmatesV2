@@ -9,12 +9,13 @@ interface Props {
 }
 
 // Generate metadata for SEO
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const business = await prisma.business.findUnique({
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const business = await prisma.business.findFirst({
     where: { 
       OR: [
-        { slug: params.slug },
-        { id: params.slug }
+        { slug },
+        { id: slug }
       ]
     },
   });
@@ -27,6 +28,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://suburbmates.com.au';
   const profileUrl = `${baseUrl}/business/${business.slug}`;
+  
+  // Generate OG image with fallback
+  const businessSlug = business.slug;
+  const name = business.name;
+  const suburb = business.suburb || "";
+  
+  const ogUrl = `/api/og?slug=${encodeURIComponent(businessSlug)}&name=${encodeURIComponent(name)}&suburb=${encodeURIComponent(suburb)}`;
+  const fallback = "/social/og-image-default.png";
 
   return {
     title: `${business.name} - ${business.category || 'Business'} in ${business.suburb} | SuburbMates`,
@@ -39,27 +48,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       type: 'website',
       locale: 'en_AU',
       siteName: 'SuburbMates',
-      images: business.logo ? [
-        {
-          url: business.logo.startsWith('http') ? business.logo : `${baseUrl}${business.logo}`,
-          width: 1200,
-          height: 630,
-          alt: `${business.name} - ${business.suburb}`,
-        }
-      ] : [
-        {
-          url: `${baseUrl}/api/og?slug=${business.slug}`,
-          width: 1200,
-          height: 630,
-          alt: `${business.name} - ${business.suburb}`,
-        }
-      ],
+      images: [ogUrl, fallback],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${business.name} - ${business.suburb}`,
       description: business.bio || `Professional ${business.category || 'services'} in ${business.suburb}`,
-      images: business.logo ? [business.logo] : [`${baseUrl}/api/og?slug=${business.slug}`],
+      images: [ogUrl, fallback],
     },
     alternates: {
       canonical: profileUrl,
@@ -67,12 +62,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function BusinessLayout({ params, children }: Props) {
-  const business = await prisma.business.findUnique({
+export default async function BusinessLayout({ params, children }: { params: Promise<{ slug: string }>; children: React.ReactNode; }) {
+  const { slug } = await params;
+  const business = await prisma.business.findFirst({
     where: { 
       OR: [
-        { slug: params.slug },
-        { id: params.slug }
+        { slug },
+        { id: slug }
       ]
     },
     include: {
@@ -88,8 +84,8 @@ export default async function BusinessLayout({ params, children }: Props) {
   const profileUrl = `${baseUrl}/business/${business.slug}`;
 
   // Generate JSON-LD structured data
-  const businessJsonLd = generateBusinessJsonLd(business, profileUrl);
-  const breadcrumbJsonLd = generateBreadcrumbJsonLd(business, profileUrl);
+const businessJsonLd = generateBusinessJsonLd(business as any, profileUrl);
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd(business as any, profileUrl);
 
   return (
     <>

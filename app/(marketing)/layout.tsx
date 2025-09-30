@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { SuburbMatesLogo } from "@/components/ui/SuburbMatesLogo";
+import { glass } from "@/lib/design-system";
 
 export const metadata: Metadata = {
   title: "Suburbmates - Melbourne Business Network",
@@ -15,11 +17,11 @@ export default function MarketingLayout({
   return (
     <div className="min-h-screen">
       {/* Marketing Navigation */}
-      <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <nav className={`border-b ${glass.navBar} sticky top-0 z-50`}>
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-xl font-bold text-primary">
-              Suburbmates
+            <Link href="/">
+              <SuburbMatesLogo variant="NavigationLogo" size="sm" />
             </Link>
             <div className="flex items-center gap-4">
               <Link href="/about">
